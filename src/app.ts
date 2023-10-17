@@ -1,26 +1,39 @@
-import express from "express";
 import cors from "cors";
+import express, { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
+import globalErrorHandler from "./app/middlewares/global-error";
+import { AppRouter } from "./routes";
+import responseData from "./shared/response";
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 
-//routes
-app.use("/api/v1");
+//router
+app.use("/api/v1", AppRouter);
 
-app.use((req, res, next) => {
-  res.status(httpStatus.NOT_FOUND).json({
-    success: false,
-    message: "Route Not Found",
-    errorMessage: [
-      {
-        path: req.originalUrl,
-        message: "Route Not Found",
-      },
-    ],
+//global error handler
+app.use(globalErrorHandler);
+
+app.get("/", (req, res) => {
+  return res.status(httpStatus.OK).json({
+    success: true,
+    message: `Lorry Lagbe app is running`,
   });
 });
+
+//route not found
+app.use((req: Request, res: Response, next: NextFunction) => {
+  return responseData(
+    {
+      statusCode: httpStatus.NOT_FOUND,
+      status: false,
+      message: "API end-point not found",
+    },
+    res
+  );
+});
+
 export default app;
