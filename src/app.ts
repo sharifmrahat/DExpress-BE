@@ -7,7 +7,12 @@ import responseData from "./shared/response";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000" || "https://lorry-lagbe-fe.vercel.app/",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
