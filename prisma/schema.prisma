@@ -1,0 +1,165 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  role Role @default(customer)
+  contactNo String?
+  address String?
+  imageUrl String?
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+
+  bookings Booking[]
+  reviewAndRatings ReviewAndRating[]
+  feedback Feedback[]
+
+  @@map("users")
+}
+
+enum Role {
+  customer
+  admin
+  super_admin
+}
+
+model Category{
+  id String @id @default(uuid())
+  title String
+
+  lorry Lorry[]
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Lorry{
+  id String @id @default(uuid())
+  model String
+  type Type  @default(SMALL)
+  plateNumber String
+  price Int @default(0)
+  status LorryStatus @default(AVAILABLE)
+  imageUrl String?
+
+  categoryId String
+  category Category @relation(fields: [categoryId], references: [id])
+
+  bookings Booking[]
+
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("lorries")
+}
+
+model Booking {
+  id String @unique @default(uuid())
+
+  startTime DateTime
+  endTime DateTime
+
+  total Int @default(0)
+
+  lorryId String
+  lorry Lorry @relation(fields: [lorryId], references: [id])
+  
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  reviewAndRatings ReviewAndRating?
+
+  status BookingStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("bookings")
+}
+
+
+model ReviewAndRating {
+
+  id String @unique @default(uuid())
+
+  review String
+  rating Float 
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  bookingId String @unique
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@id([userId, bookingId]) 
+  @@map("reviewAndRatings")
+}
+
+model Articles {
+  id String @unique @default(uuid()) 
+  title String 
+  imageUrl String?
+  description String 
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("articles")
+}
+model Feedback {
+  id String @unique @default(uuid()) 
+  topic String 
+  message String 
+
+  userId String?
+  user User? @relation(fields: [userId], references: [id])
+
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("feedbacks")
+}
+
+
+enum Type {
+  LARGE
+  MEDIUM
+  SMALL
+}
+
+enum LorryStatus {
+  AVAILABLE
+  BOOKED
+  NOTAVAILABLE
+}
+
+enum BookingStatus {
+  PENDING
+  BOOKED
+  CANCELLED
+  REJECT
+  COMPLETED
+}
