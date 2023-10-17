@@ -117,17 +117,6 @@ model ReviewAndRating {
   @@map("reviewAndRatings")
 }
 
-model Articles {
-  id String @unique @default(uuid()) 
-  title String 
-  imageUrl String?
-  description String 
-
-  createdAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-
-  @@map("articles")
-}
 model Feedback {
   id String @unique @default(uuid()) 
   topic String 
@@ -141,6 +130,18 @@ model Feedback {
   updateAt DateTime @updatedAt
 
   @@map("feedbacks")
+}
+
+model Articles {
+  id String @unique @default(uuid()) 
+  title String 
+  imageUrl String?
+  description String 
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("articles")
 }
 
 
