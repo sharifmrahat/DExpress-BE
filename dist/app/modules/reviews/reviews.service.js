@@ -31,7 +31,7 @@ const insertReview = (payload) => __awaiter(void 0, void 0, void 0, function* ()
             id: payload.bookingId,
         },
     });
-    if ((booking === null || booking === void 0 ? void 0 : booking.status) !== client_1.BookingStatus.COMPLETED)
+    if ((booking === null || booking === void 0 ? void 0 : booking.status) !== client_1.BookingStatus.Completed)
         throw new api_error_1.default(http_status_1.default.BAD_REQUEST, "Review and rating only for completed booking!");
     const createdReview = yield prisma_client_1.default.review.create({
         data: payload,
