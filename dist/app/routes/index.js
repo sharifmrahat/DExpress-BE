@@ -10,12 +10,14 @@ const users_router_1 = require("../modules/users/users.router");
 const categories_router_1 = require("../modules/categories/categories.router");
 const lorries_router_1 = require("../modules/lorries/lorries.router");
 const feedbacks_router_1 = require("../modules/feedbacks/feedbacks.router");
+const reviews_router_1 = require("../modules/reviews/reviews.router");
 const router = express_1.default.Router();
 const routes = [
     { path: "/auth", module: auth_router_1.AuthRouter },
     { path: "/users", module: users_router_1.UserRouter },
     { path: "/categories", module: categories_router_1.CategoryRouter },
     { path: "/lorries", module: lorries_router_1.LorryRouter },
+    { path: "/reviews", module: reviews_router_1.ReviewRouter },
     { path: "/feedbacks", module: feedbacks_router_1.FeedbackRouter },
 ];
 routes.forEach((route) => {

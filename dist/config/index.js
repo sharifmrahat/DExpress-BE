@@ -14,5 +14,5 @@ exports.default = {
     JWT_SECRET_ACCESS: process.env.JWT_SECRET_ACCESS,
     JWT_SECRET_EXPIRY: process.env.JWT_SECRET_EXPIRY,
     DEFAULT_PASSWORD: process.env.DEFAULT_PASSWORD,
-    ORIGIN_URL: process.env.ORIGIN_URL || "http://localhost:3000",
+    ORIGIN_URL: process.env.ORIGIN_URL,
 };
