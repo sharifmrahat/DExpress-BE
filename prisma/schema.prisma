@@ -53,10 +53,10 @@ model Category{
 model Lorry{
   id String @id @default(uuid())
   model String
-  type Type  @default(SMALL)
+  type Type  @default(Small)
   plateNumber String
   price Int @default(0)
-  status LorryStatus @default(AVAILABLE)
+  status LorryStatus @default(Available)
   imageUrl String?
 
   categoryId String
@@ -87,7 +87,7 @@ model Booking {
 
   reviews Review?
 
-  status BookingStatus @default(PENDING)
+  status BookingStatus @default(Pending)
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -146,21 +146,21 @@ model Article {
 
 
 enum Type {
-  LARGE
-  MEDIUM
-  SMALL
+  Large
+  Medium
+  Small
 }
 
 enum LorryStatus {
-  AVAILABLE
-  BOOKED
-  NOTAVAILABLE
+  Available
+  Booked
+  Not_Available
 }
 
 enum BookingStatus {
-  PENDING
-  BOOKED
-  CANCELLED
-  REJECT
-  COMPLETED
+  Pending
+  Booked
+  Cancelled
+  Rejected
+  Completed
 }
