@@ -18,7 +18,7 @@ const insertReview = async (payload: Review): Promise<Review> => {
       id: payload.bookingId,
     },
   });
-  if (booking?.status !== BookingStatus.COMPLETED)
+  if (booking?.status !== BookingStatus.Completed)
     throw new ApiError(
       httpStatus.BAD_REQUEST,
       "Review and rating only for completed booking!"
