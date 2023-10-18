@@ -73,7 +73,7 @@ const findOneCategory = async (id: string): Promise<Category | null> => {
         include: {
           bookings: {
             include: {
-              reviewAndRatings: true,
+              reviews: true,
             },
           },
         },
@@ -94,7 +94,7 @@ const findCategories = async (): Promise<Category[]> => {
         include: {
           bookings: {
             include: {
-              reviewAndRatings: true,
+              reviews: true,
             },
           },
         },

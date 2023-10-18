@@ -1,17 +1,17 @@
 /*
   Warnings:
 
-  - You are about to drop the `reviewAndRatings` table. If the table is not empty, all the data it contains will be lost.
+  - You are about to drop the `reviews` table. If the table is not empty, all the data it contains will be lost.
 
 */
 -- DropForeignKey
-ALTER TABLE "reviewAndRatings" DROP CONSTRAINT "reviewAndRatings_bookingId_fkey";
+ALTER TABLE "reviews" DROP CONSTRAINT "reviews_bookingId_fkey";
 
 -- DropForeignKey
-ALTER TABLE "reviewAndRatings" DROP CONSTRAINT "reviewAndRatings_userId_fkey";
+ALTER TABLE "reviews" DROP CONSTRAINT "reviews_userId_fkey";
 
 -- DropTable
-DROP TABLE "reviewAndRatings";
+DROP TABLE "reviews";
 
 -- CreateTable
 CREATE TABLE "reviews" (

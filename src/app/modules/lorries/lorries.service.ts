@@ -88,7 +88,7 @@ const findOneLorry = async (id: string): Promise<Lorry | null> => {
     include: {
       bookings: {
         include: {
-          reviewAndRatings: true,
+          reviews: true,
         },
       },
       category: true,
@@ -154,7 +154,7 @@ const findLorries = async (
     include: {
       bookings: {
         include: {
-          reviewAndRatings: true,
+          reviews: true,
         },
       },
       category: true,

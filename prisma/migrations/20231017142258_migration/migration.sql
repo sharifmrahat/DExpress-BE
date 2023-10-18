@@ -66,7 +66,7 @@ CREATE TABLE "bookings" (
 );
 
 -- CreateTable
-CREATE TABLE "reviewAndRatings" (
+CREATE TABLE "reviews" (
     "id" TEXT NOT NULL,
     "review" TEXT NOT NULL,
     "rating" DOUBLE PRECISION NOT NULL,
@@ -75,7 +75,7 @@ CREATE TABLE "reviewAndRatings" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updateAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "reviewAndRatings_pkey" PRIMARY KEY ("userId","bookingId")
+    CONSTRAINT "reviews_pkey" PRIMARY KEY ("userId","bookingId")
 );
 
 -- CreateTable
@@ -105,10 +105,10 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 CREATE UNIQUE INDEX "bookings_id_key" ON "bookings"("id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "reviewAndRatings_id_key" ON "reviewAndRatings"("id");
+CREATE UNIQUE INDEX "reviews_id_key" ON "reviews"("id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "reviewAndRatings_bookingId_key" ON "reviewAndRatings"("bookingId");
+CREATE UNIQUE INDEX "reviews_bookingId_key" ON "reviews"("bookingId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "articles_id_key" ON "articles"("id");
@@ -126,10 +126,10 @@ ALTER TABLE "bookings" ADD CONSTRAINT "bookings_lorryId_fkey" FOREIGN KEY ("lorr
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "reviewAndRatings" ADD CONSTRAINT "reviewAndRatings_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "reviewAndRatings" ADD CONSTRAINT "reviewAndRatings_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_bookingId_fkey" FOREIGN KEY ("bookingId") REFERENCES "bookings"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "feedbacks" ADD CONSTRAINT "feedbacks_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
