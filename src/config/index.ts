@@ -11,4 +11,5 @@ export default {
   JWT_SECRET_ACCESS: process.env.JWT_SECRET_ACCESS,
   JWT_SECRET_EXPIRY: process.env.JWT_SECRET_EXPIRY,
   DEFAULT_PASSWORD: process.env.DEFAULT_PASSWORD,
+  ORIGIN_URL: process.env.ORIGIN_URL,
 };

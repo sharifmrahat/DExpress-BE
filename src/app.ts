@@ -4,12 +4,13 @@ import httpStatus from "http-status";
 import globalErrorHandler from "./app/middlewares/global-error";
 import { AppRouter } from "./app/routes";
 import responseData from "./shared/response";
+import config from './config'
 
 const app = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://lorry-lagbe-fe.vercel.app"],
+    origin: config.ORIGIN_URL,
     credentials: true,
   })
 );
