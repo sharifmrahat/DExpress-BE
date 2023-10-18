@@ -26,7 +26,7 @@ model User {
 
 
   bookings Booking[]
-  reviewAndRatings ReviewAndRating[]
+  reviews Review[]
   feedback Feedback[]
 
   @@map("users")
@@ -85,7 +85,7 @@ model Booking {
   userId String
   user User @relation(fields: [userId], references: [id])
 
-  reviewAndRatings ReviewAndRating?
+  reviews Review?
 
   status BookingStatus @default(PENDING)
 
@@ -96,7 +96,7 @@ model Booking {
 }
 
 
-model ReviewAndRating {
+model Review {
 
   id String @unique @default(uuid())
 
@@ -114,7 +114,7 @@ model ReviewAndRating {
   updateAt DateTime @updatedAt
 
   @@id([userId, bookingId]) 
-  @@map("reviewAndRatings")
+  @@map("reviews")
 }
 
 model Feedback {

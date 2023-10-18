@@ -9,9 +9,10 @@ const http_status_1 = __importDefault(require("http-status"));
 const global_error_1 = __importDefault(require("./app/middlewares/global-error"));
 const routes_1 = require("./app/routes");
 const response_1 = __importDefault(require("./shared/response"));
+const config_1 = __importDefault(require("./config"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: ["http://localhost:3000", "https://lorry-lagbe-fe.vercel.app"],
+    origin: config_1.default.ORIGIN_URL,
     credentials: true,
 }));
 app.use(express_1.default.json());
