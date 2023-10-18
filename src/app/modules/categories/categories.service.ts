@@ -1,116 +1,114 @@
-import httpStatus from "http-status"
-import prismaClient from "../../../shared/prisma-client"
-import {Category} from "@prisma/client";
-import ApiError from "../../../errors/api-error"
+import httpStatus from "http-status";
+import prismaClient from "../../../shared/prisma-client";
+import { Category } from "@prisma/client";
+import ApiError from "../../../errors/api-error";
 
 const insertCategory = async (payload: Category): Promise<Category> => {
   const categoryExist = await prismaClient.category.findFirst({
     where: {
-      title: {equals: payload.title}
-    }
-  })
-  if(categoryExist) throw new ApiError(httpStatus.CONFLICT,'Category already exist!')
+      title: { equals: payload.title },
+    },
+  });
+  if (categoryExist)
+    throw new ApiError(httpStatus.CONFLICT, "Category already exist!");
   const createdCategory = await prismaClient.category.create({
-    data: payload
-  })
+    data: payload,
+  });
 
+  return createdCategory;
+};
 
-  return createdCategory
-}
-
-const updateCategory = async (id:string, payload: Category): Promise<Category | null> => {
-  
+const updateCategory = async (
+  id: string,
+  payload: Category
+): Promise<Category | null> => {
   const categoryExist = await prismaClient.category.findUnique({
     where: {
-      id
-    }
-  })
+      id,
+    },
+  });
 
-  if(!categoryExist)
-  throw new ApiError(httpStatus.NOT_FOUND, 'Category not exists')
+  if (!categoryExist)
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not exists");
 
   const category = await prismaClient.category.update({
     where: {
-      id
+      id,
     },
-    data: payload
-  })
+    data: payload,
+  });
 
-  return category
-}
- 
-const deleteCategory = async (id:string): Promise<Category | null> => {
-  
+  return category;
+};
+
+const deleteCategory = async (id: string): Promise<Category | null> => {
   const categoryExist = await prismaClient.category.findUnique({
     where: {
-      id
+      id,
     },
     include: {
-      vehicles: true
-    }
-  })
+      lorries: true,
+    },
+  });
 
-  if(!categoryExist)
-  throw new ApiError(httpStatus.NOT_FOUND, 'Category not exists')
+  if (!categoryExist)
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not exists");
 
-  const category = await prismaClient.category.delete({
+  await prismaClient.category.delete({
     where: {
-      id
-    }
-  })
+      id,
+    },
+  });
 
-  return categoryExist
-}
+  return categoryExist;
+};
 
 const findOneCategory = async (id: string): Promise<Category | null> => {
   const categoryExist = await prismaClient.category.findUnique({
     where: {
-      id
+      id,
     },
     include: {
-      vehicles: {
+      lorries: {
         include: {
           bookings: {
             include: {
-              reviewAndRatings: true
-            }
-          }
-        }
-      }
-    }
-  })
+              reviewAndRatings: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
-  if(!categoryExist)
-  throw new ApiError(httpStatus.NOT_FOUND, 'Category not exists')
+  if (!categoryExist)
+    throw new ApiError(httpStatus.NOT_FOUND, "Category not exists");
 
-  return categoryExist
-}
+  return categoryExist;
+};
 
 const findCategories = async (): Promise<Category[]> => {
   const categories = await prismaClient.category.findMany({
     include: {
-      vehicles: {
+      lorries: {
         include: {
           bookings: {
             include: {
-              reviewAndRatings: true
-            }
-          }
-        }
-      }
-    }
-  })
+              reviewAndRatings: true,
+            },
+          },
+        },
+      },
+    },
+  });
 
-  return categories
-}
-
-
-
+  return categories;
+};
 
 export const CategoryService = {
   insertCategory,
   updateCategory,
   deleteCategory,
   findOneCategory,
-  findCategories
-}
+  findCategories,
+};

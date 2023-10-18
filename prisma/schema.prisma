@@ -42,7 +42,7 @@ model Category{
   id String @id @default(uuid())
   title String
 
-  lorry Lorry[]
+  lorries Lorry[]
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -132,7 +132,7 @@ model Feedback {
   @@map("feedbacks")
 }
 
-model Articles {
+model Article {
   id String @unique @default(uuid()) 
   title String 
   imageUrl String?
