@@ -11,9 +11,7 @@ export const calculateTotal = async (
   const lorry = await prismaClient.lorry.findUnique({
     where: {
       id: lorryId,
-      status: {
-        not: LorryStatus.Available,
-      },
+      status: LorryStatus.Available,
     },
   });
   if (!lorry) throw new ApiError(httpStatus.NOT_FOUND, "Lorry Does not found!");

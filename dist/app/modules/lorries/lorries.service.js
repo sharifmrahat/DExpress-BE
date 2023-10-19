@@ -52,6 +52,7 @@ const updateLorry = (id, payload) => __awaiter(void 0, void 0, void 0, function*
         const exist = yield prisma_client_1.default.lorry.findMany({
             where: {
                 id: { not: id },
+                plateNumber: payload.plateNumber,
             },
         });
         if (exist.length)
