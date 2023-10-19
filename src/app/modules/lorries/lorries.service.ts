@@ -40,7 +40,7 @@ const updateLorry = async (
   if (payload.plateNumber) {
     const exist = await prismaClient.lorry.findMany({
       where: {
-        id: { not: payload.id },
+        id: { not: id },
       },
     });
     if (exist.length)
@@ -50,7 +50,8 @@ const updateLorry = async (
       );
   }
 
-  if (!lorryExist) throw new ApiError(httpStatus.NOT_FOUND, "Lorry not exists");
+  if (!lorryExist)
+    throw new ApiError(httpStatus.NOT_FOUND, "Lorry does not exists");
 
   const lorry = await prismaClient.lorry.update({
     where: {

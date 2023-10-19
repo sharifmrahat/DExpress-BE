@@ -12,7 +12,7 @@ router
   .route("/create-lorry")
   .post(
     validateRequest(LorryValidation.createLorryZodSchema),
-    auth(Role.admin),
+    auth(Role.admin, Role.super_admin),
     LorryController.insertLorry
   );
 
@@ -24,9 +24,9 @@ router
   .get(LorryController.findOneLorry)
   .patch(
     validateRequest(LorryValidation.updateLorryZodSchema),
-    auth(Role.admin),
+    auth(Role.admin, Role.super_admin),
     LorryController.updateLorry
   )
-  .delete(auth(Role.admin), LorryController.deleteLorry);
+  .delete(auth(Role.admin, Role.super_admin), LorryController.deleteLorry);
 
 export const LorryRouter = router;
