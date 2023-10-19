@@ -1,7 +1,6 @@
 import httpStatus from "http-status";
 import ApiError from "../../../errors/api-error";
 import prismaClient from "../../../shared/prisma-client";
-import { LorryStatus } from "@prisma/client";
 
 export const calculateTotal = async (
   startDate: Date,
@@ -11,7 +10,6 @@ export const calculateTotal = async (
   const lorry = await prismaClient.lorry.findUnique({
     where: {
       id: lorryId,
-      status: LorryStatus.Available,
     },
   });
   if (!lorry) throw new ApiError(httpStatus.NOT_FOUND, "Lorry Does not found!");
