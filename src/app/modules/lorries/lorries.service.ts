@@ -41,6 +41,7 @@ const updateLorry = async (
     const exist = await prismaClient.lorry.findMany({
       where: {
         id: { not: id },
+        plateNumber: payload.plateNumber,
       },
     });
     if (exist.length)

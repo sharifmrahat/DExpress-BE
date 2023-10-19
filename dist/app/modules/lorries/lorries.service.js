@@ -51,14 +51,14 @@ const updateLorry = (id, payload) => __awaiter(void 0, void 0, void 0, function*
     if (payload.plateNumber) {
         const exist = yield prisma_client_1.default.lorry.findMany({
             where: {
-                id: { not: payload.id },
+                id: { not: id },
             },
         });
         if (exist.length)
             throw new api_error_1.default(http_status_1.default.CONFLICT, "Lorry already exist with same plate number!");
     }
     if (!lorryExist)
-        throw new api_error_1.default(http_status_1.default.NOT_FOUND, "Lorry not exists");
+        throw new api_error_1.default(http_status_1.default.NOT_FOUND, "Lorry does not exists");
     const lorry = yield prisma_client_1.default.lorry.update({
         where: {
             id,
