@@ -23,6 +23,10 @@ router
   );
 
 router
+  .route("/my-bookings")
+  .get(auth(Role.customer), BookingController.findMyBookings);
+
+router
   .route("/:lorryId/lorry")
   .get(
     auth(Role.super_admin, Role.admin),

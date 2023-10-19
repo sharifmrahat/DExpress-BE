@@ -281,9 +281,29 @@ const findBookings = async (
   };
 };
 
+const findMyBookings = async (
+  payload: IValidateUser
+): Promise<Booking[] | null> => {
+  const bookingExist = await prismaClient.booking.findMany({
+    where: {
+      userId: payload.userId,
+    },
+    include: {
+      lorry: true,
+      user: true,
+      reviews: true,
+    },
+  });
+  if (!bookingExist)
+    throw new ApiError(httpStatus.NOT_FOUND, "Booking does not exist!");
+
+  return bookingExist;
+};
+
 export const BookingService = {
   insertBooking,
   findOneBooking,
   findBookings,
   updateBooking,
+  findMyBookings,
 };

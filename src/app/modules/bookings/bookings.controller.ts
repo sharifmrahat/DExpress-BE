@@ -63,6 +63,18 @@ const findBookings = catchAsync(async (req, res) => {
   );
 });
 
+const findMyBookings = catchAsync(async (req, res) => {
+  const user = (req as any).user as IValidateUser;
+  const result = await BookingService.findMyBookings(user);
+  return responseData(
+    {
+      message: "Bookings retrieved successfully",
+      result,
+    },
+    res
+  );
+});
+
 const findBookingByLorry = catchAsync(async (req, res) => {
   const user = (req as any).user as IValidateUser;
   const lorryId = req.params.lorryId;
@@ -101,4 +113,5 @@ export const BookingController = {
   findBookings,
   updateBookingBooking,
   findBookingByLorry,
+  findMyBookings,
 };

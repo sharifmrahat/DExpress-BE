@@ -16,14 +16,10 @@ exports.BookingUtils = exports.calculateTotal = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const api_error_1 = __importDefault(require("../../../errors/api-error"));
 const prisma_client_1 = __importDefault(require("../../../shared/prisma-client"));
-const client_1 = require("@prisma/client");
 const calculateTotal = (startDate, endDate, lorryId) => __awaiter(void 0, void 0, void 0, function* () {
     const lorry = yield prisma_client_1.default.lorry.findUnique({
         where: {
             id: lorryId,
-            status: {
-                not: client_1.LorryStatus.Available,
-            },
         },
     });
     if (!lorry)
