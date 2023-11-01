@@ -10,12 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id String @id @default(uuid())
   name String
   email String @unique
-  password String
+  password String?
   role Role @default(customer)
   contactNo String?
   address String?
@@ -24,70 +23,71 @@ model User {
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
 
-
   bookings Booking[]
+  bookingLogs BookingLogs[]
   reviews Review[]
-  feedback Feedback[]
+  feedbacks Feedback[]
+  articles Article[]
 
   @@map("users")
 }
 
-enum Role {
-  customer
-  admin
-  super_admin
-}
-
-model Category{
+model Package {
   id String @id @default(uuid())
   title String
-
-  lorries Lorry[]
-
-  createdAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-
-  @@map("categories")
-}
-
-model Lorry{
-  id String @id @default(uuid())
-  model String
-  type Type  @default(Small)
-  plateNumber String
-  price Int @default(0)
-  status LorryStatus @default(Available)
+  price Int
   imageUrl String?
+  description String?
 
-  categoryId String
-  category Category @relation(fields: [categoryId], references: [id])
+  serviceId String?
+  service Service? @relation(fields: [serviceId], references: [id])
 
   bookings Booking[]
 
-
+  isActive Boolean @default(true)
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
-
-  @@map("lorries")
+  @@map("packages")
 }
+
+model Service {
+  id String @id @default(uuid())
+  title String
+  imageUrl String?
+  description String?
+
+  packages Package[]
+  bookings Booking[]
+
+  isActive Boolean @default(true)
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  @@map("services")
+}
+
 
 model Booking {
   id String @unique @default(uuid())
 
-  startTime DateTime
-  endTime DateTime
-
-  total Int @default(0)
-
-  lorryId String
-  lorry Lorry @relation(fields: [lorryId], references: [id])
-  
   userId String
   user User @relation(fields: [userId], references: [id])
 
-  reviews Review?
+  serviceId String
+  service Service @relation(fields: [serviceId], references: [id])
 
-  status BookingStatus @default(Pending)
+  packageId String
+  package Package @relation(fields: [packageId], references: [id])
+
+  departureDate DateTime
+  deliveryDate DateTime
+
+  totalCost Int
+
+  status BookingStatus @default(Processing)
+
+  review Review?
+
+  bookingLogs BookingLogs[]
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -95,20 +95,35 @@ model Booking {
   @@map("bookings")
 }
 
-
-model Review {
-
+model BookingLogs {
   id String @unique @default(uuid())
 
-  review String
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  bookingId String
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  currentStatus String
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+
+  @@map("bookingLogs")
+}
+
+
+model Review {
+  id String @unique @default(uuid())
+  description String
   rating Float 
+  imageUrls String[]
 
   userId String
   user User @relation(fields: [userId], references: [id])
 
   bookingId String @unique
   booking Booking @relation(fields: [bookingId], references: [id])
-
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -119,11 +134,12 @@ model Review {
 
 model Feedback {
   id String @unique @default(uuid()) 
-  topic String 
-  message String 
+  subject String 
+  message String
+  attachments String[]
 
-  userId String?
-  user User? @relation(fields: [userId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
 
 
   createdAt DateTime @default(now())
@@ -135,8 +151,11 @@ model Feedback {
 model Article {
   id String @unique @default(uuid()) 
   title String 
-  imageUrl String?
-  description String 
+  thumbnail String?
+  description String
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -144,23 +163,16 @@ model Article {
   @@map("articles")
 }
 
-
-enum Type {
-  Large
-  Medium
-  Small
-}
-
-enum LorryStatus {
-  Available
-  Booked
-  Not_Available
+enum Role {
+  customer
+  admin
+  super_admin
 }
 
 enum BookingStatus {
-  Pending
-  Booked
+  Processing
+  Confirmed
   Cancelled
-  Rejected
-  Completed
+  In_Transit
+  Shipped
 }
