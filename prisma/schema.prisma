@@ -17,16 +17,16 @@ model User {
   password String?
   role Role @default(customer)
   contactNo String?
-  address String?
+  addresses String[]
   imageUrl String?
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
 
   bookings Booking[]
-  bookingLogs BookingLogs[]
+  bookingLogs BookingLog[]
   reviews Review[]
-  feedbacks Feedback[]
+  feedback Feedback?
   articles Article[]
 
   @@map("users")
@@ -68,6 +68,7 @@ model Service {
 
 model Booking {
   id String @unique @default(uuid())
+  bkId String @unique
 
   userId String
   user User @relation(fields: [userId], references: [id])
@@ -81,13 +82,20 @@ model Booking {
   departureDate DateTime
   deliveryDate DateTime
 
+  pickingAddress String?
+  shippingAddress String
+
   totalCost Int
+
+  paymentMethod PaymentMethod @default(COD)
+  paymentStatus PaymentStatus @default(Unpaid)
+  transactionId String?
 
   status BookingStatus @default(Processing)
 
   review Review?
 
-  bookingLogs BookingLogs[]
+  bookingLogs BookingLog[]
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -95,7 +103,7 @@ model Booking {
   @@map("bookings")
 }
 
-model BookingLogs {
+model BookingLog {
   id String @unique @default(uuid())
 
   userId String
@@ -104,7 +112,7 @@ model BookingLogs {
   bookingId String
   booking Booking @relation(fields: [bookingId], references: [id])
 
-  currentStatus String
+  currentStatus BookingStatus
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -138,9 +146,8 @@ model Feedback {
   message String
   attachments String[]
 
-  userId String
+  userId String @unique
   user User @relation(fields: [userId], references: [id])
-
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
@@ -153,6 +160,8 @@ model Article {
   title String 
   thumbnail String?
   description String
+
+  status ArticleStatus @default(Draft)
 
   userId String
   user User @relation(fields: [userId], references: [id])
@@ -175,4 +184,21 @@ enum BookingStatus {
   Cancelled
   In_Transit
   Shipped
+}
+
+enum PaymentMethod {
+ COD
+ Card
+ Bank
+}
+
+enum PaymentStatus {
+ Unpaid
+ Paid
+}
+
+enum ArticleStatus {
+ Draft
+ Published
+ Archived
 }
