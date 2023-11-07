@@ -20,14 +20,19 @@ model User {
   addresses String[]
   imageUrl String?
 
-  createdAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-
   bookings Booking[]
   bookingLogs BookingLog[]
   reviews Review[]
   feedback Feedback?
   articles Article[]
+
+  currentOtp String?
+  isVerified Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
 
   @@map("users")
 }
@@ -44,9 +49,11 @@ model Package {
 
   bookings Booking[]
 
-  isActive Boolean @default(true)
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
+
   @@map("packages")
 }
 
@@ -59,16 +66,19 @@ model Service {
   packages Package[]
   bookings Booking[]
 
-  isActive Boolean @default(true)
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
   @@map("services")
 }
 
 
 model Booking {
   id String @unique @default(uuid())
-  bkId String @unique
+  bkId String? @unique
+
+  bookingType BookingType @default(Package)
 
   userId String
   user User @relation(fields: [userId], references: [id])
@@ -76,8 +86,8 @@ model Booking {
   serviceId String
   service Service @relation(fields: [serviceId], references: [id])
 
-  packageId String
-  package Package @relation(fields: [packageId], references: [id])
+  packageId String?
+  package Package? @relation(fields: [packageId], references: [id])
 
   departureDate DateTime
   deliveryDate DateTime
@@ -85,8 +95,10 @@ model Booking {
   pickingAddress String?
   shippingAddress String
 
-  totalCost Int
+  totalCost Int @default(0)
 
+  remarks String?
+  
   paymentMethod PaymentMethod @default(COD)
   paymentStatus PaymentStatus @default(Unpaid)
   transactionId String?
@@ -99,6 +111,8 @@ model Booking {
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
 
   @@map("bookings")
 }
@@ -116,6 +130,8 @@ model BookingLog {
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
 
   @@map("bookingLogs")
 }
@@ -135,6 +151,8 @@ model Review {
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
 
   @@id([userId, bookingId]) 
   @@map("reviews")
@@ -151,6 +169,8 @@ model Feedback {
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
 
   @@map("feedbacks")
 }
@@ -168,6 +188,8 @@ model Article {
 
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
 
   @@map("articles")
 }
@@ -176,6 +198,11 @@ enum Role {
   customer
   admin
   super_admin
+}
+
+enum BookingType {
+  Package
+  Custom
 }
 
 enum BookingStatus {
