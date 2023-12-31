@@ -18,4 +18,11 @@ router
     AuthController.login
   );
 
+router
+  .route("/social")
+  .post(
+    validateRequest(AuthValidation.socialAuthZodSchema),
+    AuthController.socialAuth
+  );
+
 export const AuthRouter = router;

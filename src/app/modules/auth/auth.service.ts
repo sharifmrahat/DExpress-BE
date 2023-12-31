@@ -34,6 +34,7 @@ const login = async (payload: { email: string; password: string }) => {
 
   return accessToken;
 };
+
 const signup = async (payload: User) => {
   const password = payload.password;
 
@@ -52,12 +53,59 @@ const signup = async (payload: User) => {
     },
   });
 
-  delete user?.password;
+  const accessToken = JwtHelpers.generateToken({
+    userId: user?.id,
+    name: user?.name,
+    email: user?.email,
+    role: user?.role,
+  });
 
-  return user;
+  return accessToken;
+};
+
+const socialAuth = async (payload: User) => {
+  const userExist = await prismaClient.user.findUnique({
+    where: {
+      email: payload.email,
+    },
+  });
+
+  if (!userExist) {
+    const createdUser = await prismaClient.user.create({
+      data: payload,
+    });
+
+    if (!createdUser)
+      throw new ApiError(httpStatus.EXPECTATION_FAILED, "User created failed");
+
+    const user: Partial<User | null> = await prismaClient.user.findFirst({
+      where: {
+        id: createdUser.id,
+      },
+    });
+
+    const accessToken = JwtHelpers.generateToken({
+      userId: user?.id,
+      name: user?.name,
+      email: user?.email,
+      role: user?.role,
+    });
+
+    return accessToken;
+  } else {
+    const accessToken = JwtHelpers.generateToken({
+      userId: userExist?.id,
+      name: userExist.name,
+      email: userExist.email,
+      role: userExist?.role,
+    });
+
+    return accessToken;
+  }
 };
 
 export const AuthService = {
   signup,
   login,
+  socialAuth,
 };

@@ -4,11 +4,11 @@ import { AuthService } from "./auth.service";
 
 const signup = catchAsync(async (req, res) => {
   const userInfo = req.body;
-  const result = await AuthService.signup(userInfo);
+  const accessToken = await AuthService.signup(userInfo);
   return responseData(
     {
-      result,
       message: `User signup successfully!`,
+      accessToken,
     },
     res
   );
@@ -16,12 +16,24 @@ const signup = catchAsync(async (req, res) => {
 
 const login = catchAsync(async (req, res) => {
   const userCredential = req.body;
-  const result = await AuthService.login(userCredential);
+  const accessToken = await AuthService.login(userCredential);
 
   return responseData(
     {
       message: "User login successfully!",
-      accessToken: result,
+      accessToken,
+    },
+    res
+  );
+});
+
+const socialAuth = catchAsync(async (req, res) => {
+  const userInfo = req.body;
+  const accessToken = await AuthService.signup(userInfo);
+  return responseData(
+    {
+      message: `User signup successfully!`,
+      accessToken,
     },
     res
   );
@@ -30,4 +42,5 @@ const login = catchAsync(async (req, res) => {
 export const AuthController = {
   signup,
   login,
+  socialAuth,
 };

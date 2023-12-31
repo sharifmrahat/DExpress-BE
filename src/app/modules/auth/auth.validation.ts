@@ -28,7 +28,22 @@ const signupAuthZodSchema = z.object({
   }),
 });
 
+const socialAuthZodSchema = z.object({
+  body: z.object({
+    name: z.string({
+      required_error: "Name is required!",
+    }),
+    email: z
+      .string({
+        required_error: "Email is required!",
+      })
+      .email(),
+    imageUrl: z.string().optional(),
+  }),
+});
+
 export const AuthValidation = {
   signupAuthZodSchema,
   loginAuthZodSchema,
+  socialAuthZodSchema,
 };
