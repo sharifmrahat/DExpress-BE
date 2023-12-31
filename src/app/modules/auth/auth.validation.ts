@@ -24,9 +24,7 @@ const signupAuthZodSchema = z.object({
       required_error: "Password is required!",
     }),
     role: z.string().optional(),
-    contactNo: z.string().optional(),
-    address: z.string().optional(),
-    profileImg: z.string().optional(),
+    imageUrl: z.string().optional(),
   }),
 });
 

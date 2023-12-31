@@ -3,14 +3,12 @@ import responseData from "../../../shared/response";
 import { AuthService } from "./auth.service";
 
 const signup = catchAsync(async (req, res) => {
-  const user = req.body;
-
-  const result = await AuthService.signup(user);
-
+  const userInfo = req.body;
+  const result = await AuthService.signup(userInfo);
   return responseData(
     {
       result,
-      message: "User registered successfully!",
+      message: `User signup successfully!`,
     },
     res
   );
@@ -18,7 +16,6 @@ const signup = catchAsync(async (req, res) => {
 
 const login = catchAsync(async (req, res) => {
   const userCredential = req.body;
-
   const result = await AuthService.login(userCredential);
 
   return responseData(

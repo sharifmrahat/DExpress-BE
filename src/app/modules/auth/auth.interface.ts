@@ -1,4 +1,6 @@
 export interface IValidateUser {
-  role: string;
   userId: string;
+  name: string;
+  email: string;
+  role: string;
 }
