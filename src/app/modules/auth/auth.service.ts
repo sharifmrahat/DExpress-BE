@@ -45,7 +45,7 @@ const signup = async (payload: User) => {
   });
 
   if (!createdUser)
-    throw new ApiError(httpStatus.EXPECTATION_FAILED, "User created failed");
+    throw new ApiError(httpStatus.EXPECTATION_FAILED, "Failed to create user");
 
   const user: Partial<User | null> = await prismaClient.user.findFirst({
     where: {
@@ -76,7 +76,10 @@ const socialAuth = async (payload: User) => {
     });
 
     if (!createdUser)
-      throw new ApiError(httpStatus.EXPECTATION_FAILED, "User created failed");
+      throw new ApiError(
+        httpStatus.EXPECTATION_FAILED,
+        "Failed to create user"
+      );
 
     const user: Partial<User | null> = await prismaClient.user.findFirst({
       where: {

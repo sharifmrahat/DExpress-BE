@@ -37,6 +37,22 @@ model User {
   @@map("users")
 }
 
+model Service {
+  id String @id @default(uuid())
+  title String
+  imageUrl String?
+  description String?
+
+  packages Package[]
+  bookings Booking[]
+
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
+  @@map("services")
+}
+
 model Package {
   id String @id @default(uuid())
   title String
@@ -55,22 +71,6 @@ model Package {
   isDeleted Boolean @default(false)
 
   @@map("packages")
-}
-
-model Service {
-  id String @id @default(uuid())
-  title String
-  imageUrl String?
-  description String?
-
-  packages Package[]
-  bookings Booking[]
-
-  createdAt DateTime @default(now())
-  updateAt DateTime @updatedAt
-  isActive Boolean @default(true)
-  isDeleted Boolean @default(false)
-  @@map("services")
 }
 
 
