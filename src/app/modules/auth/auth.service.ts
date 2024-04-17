@@ -38,7 +38,7 @@ const login = async (payload: { email: string; password: string }) => {
 const signup = async (payload: User) => {
   const password = payload.password;
 
-  payload.password = await bcrypt.hash(password, config.BCRYPT_SALT_ROUNDS);
+  payload.password = await bcrypt.hash(password!, config.BCRYPT_SALT_ROUNDS);
 
   const createdUser = await prismaClient.user.create({
     data: payload,

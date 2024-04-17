@@ -29,10 +29,10 @@ const login = catchAsync(async (req, res) => {
 
 const socialAuth = catchAsync(async (req, res) => {
   const userInfo = req.body;
-  const accessToken = await AuthService.signup(userInfo);
+  const accessToken = await AuthService.socialAuth(userInfo);
   return responseData(
     {
-      message: `User signup successfully!`,
+      message: `User login successfully!`,
       accessToken,
     },
     res
