@@ -1,4 +1,5 @@
 import catchAsync from "../../../shared/catch-async";
+import pick from "../../../shared/pick";
 import responseData from "../../../shared/response";
 import { IValidateUser } from "../auth/auth.interface";
 import { UserService } from "./users.service";
@@ -8,7 +9,7 @@ const insertUser = catchAsync(async (req, res) => {
 
   const result = await UserService.insertUser(user);
 
-  return responseData({ message: "User inserted  successfully", result }, res);
+  return responseData({ message: "User created successfully", result }, res);
 });
 
 const updateUser = catchAsync(async (req, res) => {
@@ -26,7 +27,7 @@ const deleteUser = catchAsync(async (req, res) => {
 
   const result = await UserService.deleteUser(id);
 
-  return responseData({ message: "User deleted  successfully", result }, res);
+  return responseData({ message: "User deleted successfully", result }, res);
 });
 
 const userProfile = catchAsync(async (req, res) => {
@@ -47,7 +48,15 @@ const findOneUser = catchAsync(async (req, res) => {
 });
 
 const findUsers = catchAsync(async (req, res) => {
-  const result = await UserService.findUsers();
+  const query = req.query;
+  const paginationOptions = pick(query, [
+    "page",
+    "size",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const filterOptions = pick(query, ["search", "role"]);
+  const result = await UserService.findUsers(filterOptions, paginationOptions);
   return responseData({ message: "Users retrieved successfully", result }, res);
 });
 

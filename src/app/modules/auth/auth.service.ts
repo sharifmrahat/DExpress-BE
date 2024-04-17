@@ -36,6 +36,13 @@ const login = async (payload: { email: string; password: string }) => {
 };
 
 const signup = async (payload: User) => {
+  const userExist = await prismaClient.user.findUnique({
+    where: {
+      email: payload.email,
+    },
+  });
+
+  if (userExist) throw new ApiError(httpStatus.CONFLICT, "User already exist!");
   const password = payload.password;
 
   payload.password = await bcrypt.hash(password!, config.BCRYPT_SALT_ROUNDS);

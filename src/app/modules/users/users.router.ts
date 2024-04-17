@@ -9,21 +9,18 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(auth(Role.admin, Role.super_admin), UserController.findUsers);
+  .get(auth(Role.admin, Role.super_admin), UserController.findUsers)
+  .post(
+    auth(Role.admin, Role.super_admin),
+    validateRequest(UserValidation.createUserValidation),
+    UserController.insertUser
+  );
 
 router
   .route("/profile")
   .get(
     auth(Role.customer, Role.admin, Role.super_admin),
     UserController.userProfile
-  );
-
-router
-  .route("/create-admin")
-  .post(
-    auth(Role.admin, Role.super_admin),
-    validateRequest(UserValidation.createUserValidation),
-    UserController.insertUser
   );
 
 router
