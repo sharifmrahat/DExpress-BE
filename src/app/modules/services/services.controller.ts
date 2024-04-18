@@ -43,10 +43,7 @@ const updateService = catchAsync(async (req, res) => {
 
   const result = await ServiceService.updateService(id, data);
 
-  return responseData(
-    { message: "Service updated  successfully", result },
-    res
-  );
+  return responseData({ message: "Service updated successfully", result }, res);
 });
 
 const deleteService = catchAsync(async (req, res) => {

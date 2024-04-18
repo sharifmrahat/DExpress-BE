@@ -20,7 +20,7 @@ const updateUser = catchAsync(async (req, res) => {
 
   const result = await UserService.updateUser(id, data, user);
 
-  return responseData({ message: "User updated  successfully", result }, res);
+  return responseData({ message: "User updated successfully", result }, res);
 });
 
 const deleteUser = catchAsync(async (req, res) => {
@@ -68,7 +68,7 @@ const updatePassword = catchAsync(async (req, res) => {
   const result = await UserService.updatePassword(data, user);
 
   return responseData(
-    { message: "Password updated  successfully", result },
+    { message: "Password updated successfully", result },
     res
   );
 });
