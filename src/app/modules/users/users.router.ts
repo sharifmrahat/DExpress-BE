@@ -24,8 +24,21 @@ router
   );
 
 router
+  .route("/update-password")
+  .patch(
+    validateRequest(UserValidation.updatePasswordValidation),
+    auth(Role.admin, Role.super_admin, Role.customer),
+    UserController.updatePassword
+  );
+
+router
   .route("/:id")
   .get(auth(Role.admin, Role.super_admin), UserController.findOneUser)
+  .patch(
+    validateRequest(UserValidation.updateUserValidation),
+    auth(Role.admin, Role.super_admin, Role.customer),
+    UserController.updateUser
+  )
   .patch(
     validateRequest(UserValidation.updateUserValidation),
     auth(Role.admin, Role.super_admin, Role.customer),

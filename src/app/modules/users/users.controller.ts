@@ -2,6 +2,7 @@ import catchAsync from "../../../shared/catch-async";
 import pick from "../../../shared/pick";
 import responseData from "../../../shared/response";
 import { IValidateUser } from "../auth/auth.interface";
+import { IUpdatePassword } from "./users.interface";
 import { UserService } from "./users.service";
 
 const insertUser = catchAsync(async (req, res) => {
@@ -60,6 +61,18 @@ const findUsers = catchAsync(async (req, res) => {
   return responseData({ message: "Users retrieved successfully", result }, res);
 });
 
+const updatePassword = catchAsync(async (req, res) => {
+  const data = req.body as IUpdatePassword;
+  const user = (req as any).user as IValidateUser;
+
+  const result = await UserService.updatePassword(data, user);
+
+  return responseData(
+    { message: "Password updated  successfully", result },
+    res
+  );
+});
+
 export const UserController = {
   insertUser,
   updateUser,
@@ -67,4 +80,5 @@ export const UserController = {
   userProfile,
   findOneUser,
   findUsers,
+  updatePassword,
 };

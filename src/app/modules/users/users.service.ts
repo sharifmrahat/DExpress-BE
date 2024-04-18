@@ -1,10 +1,11 @@
+import bcrypt from "bcrypt";
 import { Prisma, Role, User } from "@prisma/client";
 import httpStatus from "http-status";
 import config from "../../../config";
 import ApiError from "../../../errors/api-error";
 import prismaClient from "../../../shared/prisma-client";
 import { IValidateUser } from "../auth/auth.interface";
-import { IUserFilterOption } from "./users.interface";
+import { IUpdatePassword, IUserFilterOption } from "./users.interface";
 import paginationHelpers, {
   IPaginationOption,
 } from "../../../helpers/pagination-helpers";
@@ -16,16 +17,21 @@ const insertUser = async (payload: User): Promise<User> => {
     },
   });
 
-  if (userExist) throw new ApiError(httpStatus.CONFLICT, "User already exist!");
+  if (userExist)
+    throw new ApiError(
+      httpStatus.CONFLICT,
+      "User already exist with same email!"
+    );
+
+  const password = payload.password;
+
+  payload.password = await bcrypt.hash(password!, config.BCRYPT_SALT_ROUNDS);
 
   const createdUser = await prismaClient.user.create({
     data: payload,
   });
   if (!createdUser)
-    throw new ApiError(
-      httpStatus.EXPECTATION_FAILED,
-      "Failed to create admin!"
-    );
+    throw new ApiError(httpStatus.EXPECTATION_FAILED, "Failed to create user!");
 
   return createdUser;
 };
@@ -35,9 +41,8 @@ const updateUser = async (
   payload: User,
   validateUser: IValidateUser
 ): Promise<Omit<User, "password"> | null> => {
-  console.log(id, payload, validateUser);
   if (validateUser.role === Role.customer && id !== validateUser.userId)
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized access");
 
   const userExist = await prismaClient.user.findUnique({
     where: {
@@ -47,12 +52,16 @@ const updateUser = async (
 
   if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
 
+  //Only super_admin can update role
   if (
     (validateUser.role === Role.customer || validateUser.role === Role.admin) &&
     payload.role &&
     userExist.role !== payload.role
   )
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized");
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      "Unauthorized to update user role"
+    );
 
   const user: Partial<User> = await prismaClient.user.update({
     where: {
@@ -149,10 +158,63 @@ const findUsers = async (
   });
 };
 
+const updatePassword = async (
+  payload: IUpdatePassword,
+  validateUser: IValidateUser
+): Promise<Omit<User, "password"> | null> => {
+  const userExist = await prismaClient.user.findUnique({
+    where: {
+      id: validateUser.userId,
+    },
+  });
+
+  if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
+
+  const oldPassword = payload.password;
+  const newPassword = payload.newPassword;
+
+  if (!userExist.password) {
+    payload.newPassword = await bcrypt.hash(
+      newPassword!,
+      config.BCRYPT_SALT_ROUNDS
+    );
+    const user: Partial<User> = await prismaClient.user.update({
+      where: {
+        id: userExist.id,
+      },
+      data: { password: payload.newPassword },
+    });
+    delete user.password;
+    return user as Omit<User, "password">;
+  } else {
+    const matchPassword = await bcrypt.compare(
+      oldPassword!,
+      userExist?.password
+    );
+    if (!matchPassword) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Password not matched!");
+    } else {
+      payload.newPassword = await bcrypt.hash(
+        newPassword!,
+        config.BCRYPT_SALT_ROUNDS
+      );
+      const user: Partial<User> = await prismaClient.user.update({
+        where: {
+          id: userExist.id,
+        },
+        data: { password: payload.newPassword },
+      });
+      delete user.password;
+      return user as Omit<User, "password">;
+    }
+  }
+};
+
 export const UserService = {
   insertUser,
   updateUser,
   deleteUser,
   findOneUser,
   findUsers,
+  updatePassword,
 };
