@@ -39,11 +39,6 @@ router
     auth(Role.admin, Role.super_admin, Role.customer),
     UserController.updateUser
   )
-  .patch(
-    validateRequest(UserValidation.updateUserValidation),
-    auth(Role.admin, Role.super_admin, Role.customer),
-    UserController.updateUser
-  )
   .delete(auth(Role.admin, Role.super_admin), UserController.deleteUser);
 
 export const UserRouter = router;
