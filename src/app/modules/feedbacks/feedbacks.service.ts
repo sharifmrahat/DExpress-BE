@@ -109,12 +109,72 @@ const findOneFeedback = async (id: string): Promise<Feedback | null> => {
     where: {
       id,
     },
+    include: {
+      user: true,
+    },
   });
 
   if (!feedbackExist)
     throw new ApiError(httpStatus.NOT_FOUND, "Feedback does not exists");
 
   return feedbackExist;
+};
+
+const findFeedbacksByUserId = async (
+  filterOptions: IFeedbackFilterOption,
+  paginationOptions: IPaginationOption,
+  validateUser: IValidateUser
+) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelpers(paginationOptions);
+
+  const andCondition = [];
+
+  andCondition.push({ userId: validateUser.userId });
+
+  const { search } = filterOptions;
+
+  if (search)
+    andCondition.push({
+      OR: ["subject", "message"].map((field) => ({
+        [field]: {
+          contains: search,
+          mode: "insensitive",
+        },
+      })),
+    });
+
+  const whereCondition: Prisma.FeedbackWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
+
+  const feedbacks = await prismaClient.feedback.findMany({
+    where: whereCondition,
+    include: {
+      user: true,
+    },
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder
+        ? { [sortBy]: sortOrder }
+        : {
+            createdAt: "desc",
+          },
+  });
+
+  const count = await prismaClient.feedback.count({
+    where: whereCondition,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total: count,
+      totalPage: !isNaN(count / limit) ? Math.ceil(count / limit) : 0,
+    },
+    data: feedbacks,
+  };
 };
 
 const updateFeedback = async (
@@ -186,8 +246,9 @@ const deleteFeedback = async (
 
 export const FeedbackService = {
   insertFeedback,
-  updateFeedback,
-  deleteFeedback,
   findOneFeedback,
   findFeedbacks,
+  findFeedbacksByUserId,
+  updateFeedback,
+  deleteFeedback,
 };

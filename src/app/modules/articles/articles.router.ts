@@ -8,14 +8,20 @@ import validateRequest from "../../middlewares/validate-request";
 const router = express.Router();
 
 router
-  .route("/create-article")
+  .route("/")
+  .get(auth("public"), ArticleController.findArticles)
   .post(
-    validateRequest(ArticleValidation.createArticleZodSchema),
     auth(Role.admin, Role.super_admin),
+    validateRequest(ArticleValidation.createArticleZodSchema),
     ArticleController.insertArticle
   );
 
-router.route("/").get(ArticleController.findArticles);
+router
+  .route("/my-articles")
+  .get(
+    auth(Role.admin, Role.super_admin),
+    ArticleController.findArticlesByUserId
+  );
 
 router
   .route("/:id")

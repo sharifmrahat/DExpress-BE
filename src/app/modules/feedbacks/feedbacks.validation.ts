@@ -12,9 +12,6 @@ const createFeedbackZodSchema = z.object({
         required_error: "Attachments is required!",
       })
     ),
-    userId: z.string({
-      required_error: "UserId is required!",
-    }),
   }),
 });
 
@@ -23,7 +20,6 @@ const updateFeedbackZodSchema = z.object({
     subject: z.string().optional(),
     message: z.string().optional(),
     attachments: z.array(z.string()).optional(),
-    userId: z.string().optional(),
     isActive: z.boolean().optional(),
     isDeleted: z.boolean().optional(),
   }),

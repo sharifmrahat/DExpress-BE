@@ -17,6 +17,10 @@ router
   );
 
 router
+  .route("/my-feedbacks")
+  .get(auth(Role.customer), FeedbackController.findFeedbacksByUserId);
+
+router
   .route("/:id")
   .get(auth("public"), FeedbackController.findOneFeedback)
   .patch(

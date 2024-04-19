@@ -26,12 +26,7 @@ const findFeedbacks = catchAsync(async (req, res) => {
     "sortBy",
     "sortOrder",
   ]);
-  const filterOptions = pick(query, [
-    "search",
-    "serviceId",
-    "minPrice",
-    "maxPrice",
-  ]);
+  const filterOptions = pick(query, ["search", "userId"]);
   const result = await FeedbackService.findFeedbacks(
     filterOptions,
     paginationOptions
@@ -51,6 +46,30 @@ const findOneFeedback = catchAsync(async (req, res) => {
   const result = await FeedbackService.findOneFeedback(id);
   return responseData(
     { message: "Feedback fetched successfully", result },
+    res
+  );
+});
+
+const findFeedbacksByUserId = catchAsync(async (req, res) => {
+  const query = req.query;
+  const paginationOptions = pick(query, [
+    "page",
+    "limit",
+    "sortBy",
+    "sortOrder",
+  ]);
+  const filterOptions = pick(query, ["search"]);
+  const user = (req as any).user as IValidateUser;
+  const result = await FeedbackService.findFeedbacksByUserId(
+    filterOptions,
+    paginationOptions,
+    user
+  );
+  return responseData(
+    {
+      message: "Feedbacks retrieved successfully",
+      result: { result: result.data, meta: result.meta },
+    },
     res
   );
 });
@@ -82,8 +101,9 @@ const deleteFeedback = catchAsync(async (req, res) => {
 
 export const FeedbackController = {
   insertFeedback,
-  updateFeedback,
-  deleteFeedback,
   findOneFeedback,
   findFeedbacks,
+  findFeedbacksByUserId,
+  updateFeedback,
+  deleteFeedback,
 };

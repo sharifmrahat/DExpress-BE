@@ -7,31 +7,21 @@ const createArticleZodSchema = z.object({
     description: z.string({
       required_error: "Description is required!",
     }),
-    imageUrl: z
-      .string({
-        required_error: "Description is required!",
-      })
-      .optional(),
+    status: z.string({
+      required_error: "Status is required!",
+    }),
+    thumbnail: z.string().optional(),
   }),
 });
 
 const updateArticleZodSchema = z.object({
   body: z.object({
-    title: z
-      .string({
-        required_error: "Title is required!",
-      })
-      .optional(),
-    description: z
-      .string({
-        required_error: "Description is required!",
-      })
-      .optional(),
-    imageUrl: z
-      .string({
-        required_error: "Description is required!",
-      })
-      .optional(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    status: z.string().optional(),
+    thumbnail: z.string().optional(),
+    isActive: z.boolean().optional(),
+    isDeleted: z.boolean().optional(),
   }),
 });
 
