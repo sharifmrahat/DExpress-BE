@@ -15,7 +15,7 @@ const findServices = catchAsync(async (req, res) => {
   const query = req.query;
   const paginationOptions = pick(query, [
     "page",
-    "size",
+    "limit",
     "sortBy",
     "sortOrder",
   ]);
@@ -25,7 +25,10 @@ const findServices = catchAsync(async (req, res) => {
     paginationOptions
   );
   return responseData(
-    { message: "services retrieved successfully", result },
+    {
+      message: "services retrieved successfully",
+      result: { result: result.data, meta: result.meta },
+    },
     res
   );
 });

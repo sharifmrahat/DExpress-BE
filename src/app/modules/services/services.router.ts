@@ -12,7 +12,7 @@ router
   .get(auth("public"), ServiceController.findServices)
   .post(
     auth(Role.admin, Role.super_admin),
-    validateRequest(ServiceValidation.createUpdateServiceValidation),
+    validateRequest(ServiceValidation.createServiceValidation),
     ServiceController.createService
   );
 
@@ -20,7 +20,7 @@ router
   .route("/:id")
   .get(auth("public"), ServiceController.findOneService)
   .patch(
-    validateRequest(ServiceValidation.createUpdateServiceValidation),
+    validateRequest(ServiceValidation.updateServiceValidation),
     auth(Role.admin, Role.super_admin),
     ServiceController.updateService
   )

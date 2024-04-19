@@ -52,13 +52,19 @@ const findUsers = catchAsync(async (req, res) => {
   const query = req.query;
   const paginationOptions = pick(query, [
     "page",
-    "size",
+    "limit",
     "sortBy",
     "sortOrder",
   ]);
   const filterOptions = pick(query, ["search", "role"]);
   const result = await UserService.findUsers(filterOptions, paginationOptions);
-  return responseData({ message: "Users retrieved successfully", result }, res);
+  return responseData(
+    {
+      message: "Users retrieved successfully",
+      result: { result: result.data, meta: result.meta },
+    },
+    res
+  );
 });
 
 const updatePassword = catchAsync(async (req, res) => {

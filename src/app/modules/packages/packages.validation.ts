@@ -1,18 +1,26 @@
 import { z } from "zod";
 
-const createServiceValidation = z.object({
+const createPackageValidation = z.object({
   body: z.object({
     title: z.string({
       required_error: "Title is required!",
+    }),
+    price: z.number({
+      required_error: "Price is required!",
+    }),
+    serviceId: z.string({
+      required_error: "ServiceId is required!",
     }),
     imageUrl: z.string().optional(),
     description: z.string().optional(),
   }),
 });
 
-const updateServiceValidation = z.object({
+const updatePackageValidation = z.object({
   body: z.object({
     title: z.string().optional(),
+    price: z.number().optional(),
+    serviceId: z.string().optional(),
     imageUrl: z.string().optional(),
     description: z.string().optional(),
     isActive: z.boolean().optional(),
@@ -20,7 +28,7 @@ const updateServiceValidation = z.object({
   }),
 });
 
-export const ServiceValidation = {
-  createServiceValidation,
-  updateServiceValidation,
+export const PackageValidation = {
+  createPackageValidation,
+  updatePackageValidation,
 };

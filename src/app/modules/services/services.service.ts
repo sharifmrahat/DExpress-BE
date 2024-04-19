@@ -35,8 +35,8 @@ const createService = async (payload: Service): Promise<Service> => {
 const findServices = async (
   filterOptions: IServiceFilterOption,
   paginationOptions: IPaginationOption
-): Promise<Service[]> => {
-  const { size, page, skip, sortBy, sortOrder } =
+) => {
+  const { limit, page, skip, sortBy, sortOrder } =
     paginationHelpers(paginationOptions);
 
   const andCondition = [];
@@ -67,8 +67,11 @@ const findServices = async (
 
   const services = await prismaClient.service.findMany({
     where: whereCondition,
+    include: {
+      packages: true,
+    },
     skip,
-    take: size,
+    take: limit,
     orderBy:
       sortBy && sortOrder
         ? { [sortBy]: sortOrder }
@@ -77,13 +80,28 @@ const findServices = async (
           },
   });
 
-  return services;
+  const count = await prismaClient.service.count({
+    where: whereCondition,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total: count,
+      totalPage: !isNaN(count / limit) ? Math.ceil(count / limit) : 0,
+    },
+    data: services,
+  };
 };
 
 const findOneService = async (id: string): Promise<Service | null> => {
   const serviceExist: Service | null = await prismaClient.service.findUnique({
     where: {
       id,
+    },
+    include: {
+      packages: true,
     },
   });
 
@@ -106,20 +124,22 @@ const updateService = async (
   if (!serviceExist)
     throw new ApiError(httpStatus.NOT_FOUND, "Service not exists");
 
-  const titleExist = await prismaClient.service.findFirst({
-    where: {
-      title: data.title,
-      NOT: {
-        id,
+  if (data.title) {
+    const titleExist = await prismaClient.service.findFirst({
+      where: {
+        title: data.title,
+        NOT: {
+          id,
+        },
       },
-    },
-  });
+    });
 
-  if (titleExist)
-    throw new ApiError(
-      httpStatus.CONFLICT,
-      "Service already exist with same title!"
-    );
+    if (titleExist)
+      throw new ApiError(
+        httpStatus.CONFLICT,
+        "Service already exist with same title!"
+      );
+  }
 
   const service: Service = await prismaClient.service.update({
     where: {

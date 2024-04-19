@@ -111,8 +111,8 @@ const findOneUser = async (
 const findUsers = async (
   filterOptions: IUserFilterOption,
   paginationOptions: IPaginationOption
-): Promise<Partial<User>[]> => {
-  const { size, page, skip, sortBy, sortOrder } =
+) => {
+  const { limit, page, skip, sortBy, sortOrder } =
     paginationHelpers(paginationOptions);
 
   const andCondition = [];
@@ -144,7 +144,7 @@ const findUsers = async (
   const users = await prismaClient.user.findMany({
     where: whereCondition,
     skip,
-    take: size,
+    take: limit,
     orderBy:
       sortBy && sortOrder
         ? { [sortBy]: sortOrder }
@@ -152,10 +152,18 @@ const findUsers = async (
             createdAt: "desc",
           },
   });
-  return users?.map((i) => {
-    const { password, ...user } = i;
-    return user;
+  const count = await prismaClient.user.count({
+    where: whereCondition,
   });
+  return {
+    meta: {
+      page,
+      limit,
+      total: count,
+      totalPage: !isNaN(count / limit) ? Math.ceil(count / limit) : 0,
+    },
+    data: users,
+  };
 };
 
 const updatePassword = async (
