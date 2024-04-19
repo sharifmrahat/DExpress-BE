@@ -20,8 +20,8 @@ router
   .route("/:id")
   .get(auth("public"), ServiceController.findOneService)
   .patch(
-    validateRequest(ServiceValidation.updateServiceValidation),
     auth(Role.admin, Role.super_admin),
+    validateRequest(ServiceValidation.updateServiceValidation),
     ServiceController.updateService
   )
   .delete(auth(Role.super_admin), ServiceController.deleteService);

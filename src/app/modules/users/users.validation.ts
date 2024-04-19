@@ -15,7 +15,7 @@ const createUserValidation = z.object({
     }),
     role: z.string().optional(),
     contactNo: z.string().optional(),
-    address: z.string().optional(),
+    addresses: z.array(z.string()).optional(),
   }),
 });
 

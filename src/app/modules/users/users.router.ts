@@ -35,8 +35,8 @@ router
   .route("/:id")
   .get(auth(Role.admin, Role.super_admin), UserController.findOneUser)
   .patch(
-    validateRequest(UserValidation.updateUserValidation),
     auth(Role.admin, Role.super_admin, Role.customer),
+    validateRequest(UserValidation.updateUserValidation),
     UserController.updateUser
   )
   .delete(auth(Role.admin, Role.super_admin), UserController.deleteUser);

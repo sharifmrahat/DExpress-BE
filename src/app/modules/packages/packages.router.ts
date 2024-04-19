@@ -20,8 +20,8 @@ router
   .route("/:id")
   .get(auth("public"), PackageController.findOnePackage)
   .patch(
-    validateRequest(PackageValidation.updatePackageValidation),
     auth(Role.admin, Role.super_admin),
+    validateRequest(PackageValidation.updatePackageValidation),
     PackageController.updatePackage
   )
   .delete(auth(Role.super_admin), PackageController.deletePackage);
