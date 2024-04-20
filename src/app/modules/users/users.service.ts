@@ -36,63 +36,6 @@ const insertUser = async (payload: User): Promise<User> => {
   return createdUser;
 };
 
-const updateUser = async (
-  id: string,
-  payload: User,
-  validateUser: IValidateUser
-): Promise<Omit<User, "password"> | null> => {
-  if (validateUser.role === Role.customer && id !== validateUser.userId)
-    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized access");
-
-  const userExist = await prismaClient.user.findUnique({
-    where: {
-      id,
-    },
-  });
-
-  if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
-
-  //Only super_admin can update role
-  if (
-    (validateUser.role === Role.customer || validateUser.role === Role.admin) &&
-    payload.role &&
-    userExist.role !== payload.role
-  )
-    throw new ApiError(
-      httpStatus.UNAUTHORIZED,
-      "Unauthorized to update user role"
-    );
-
-  const user: Partial<User> = await prismaClient.user.update({
-    where: {
-      id,
-    },
-    data: payload,
-  });
-  delete user.password;
-  return user as Omit<User, "password">;
-};
-
-const deleteUser = async (id: string): Promise<Partial<User> | null> => {
-  const userExist = await prismaClient.user.findUnique({
-    where: {
-      id,
-    },
-  });
-
-  if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
-
-  await prismaClient.user.delete({
-    where: {
-      id,
-    },
-  });
-
-  const { password, ...user } = userExist;
-
-  return user;
-};
-
 const findOneUser = async (
   id: string
 ): Promise<Omit<User, "password"> | null> => {
@@ -164,6 +107,63 @@ const findUsers = async (
     },
     data: users,
   };
+};
+
+const updateUser = async (
+  id: string,
+  payload: User,
+  validateUser: IValidateUser
+): Promise<Omit<User, "password"> | null> => {
+  if (validateUser.role === Role.customer && id !== validateUser.userId)
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized access");
+
+  const userExist = await prismaClient.user.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
+
+  //Only super_admin can update role
+  if (
+    (validateUser.role === Role.customer || validateUser.role === Role.admin) &&
+    payload.role &&
+    userExist.role !== payload.role
+  )
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      "Unauthorized to update user role"
+    );
+
+  const user: Partial<User> = await prismaClient.user.update({
+    where: {
+      id,
+    },
+    data: payload,
+  });
+  delete user.password;
+  return user as Omit<User, "password">;
+};
+
+const deleteUser = async (id: string): Promise<Partial<User> | null> => {
+  const userExist = await prismaClient.user.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
+
+  await prismaClient.user.delete({
+    where: {
+      id,
+    },
+  });
+
+  const { password, ...user } = userExist;
+
+  return user;
 };
 
 const updatePassword = async (

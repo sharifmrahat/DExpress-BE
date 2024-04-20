@@ -13,41 +13,6 @@ const insertUser = catchAsync(async (req, res) => {
   return responseData({ message: "User created successfully", result }, res);
 });
 
-const updateUser = catchAsync(async (req, res) => {
-  const id = req.params.id;
-  const data = req.body;
-  const user = (req as any).user as IValidateUser;
-
-  const result = await UserService.updateUser(id, data, user);
-
-  return responseData({ message: "User updated successfully", result }, res);
-});
-
-const deleteUser = catchAsync(async (req, res) => {
-  const id = req.params.id;
-
-  const result = await UserService.deleteUser(id);
-
-  return responseData({ message: "User deleted successfully", result }, res);
-});
-
-const userProfile = catchAsync(async (req, res) => {
-  const user = (req as any).user as IValidateUser;
-
-  const result = await UserService.findOneUser(user.userId);
-  return responseData(
-    { message: "User profile fetched successfully", result },
-    res
-  );
-});
-
-const findOneUser = catchAsync(async (req, res) => {
-  const id = req.params.id;
-
-  const result = await UserService.findOneUser(id);
-  return responseData({ message: "User fetched successfully", result }, res);
-});
-
 const findUsers = catchAsync(async (req, res) => {
   const query = req.query;
   const paginationOptions = pick(query, [
@@ -67,6 +32,33 @@ const findUsers = catchAsync(async (req, res) => {
   );
 });
 
+const findOneUser = catchAsync(async (req, res) => {
+  const id = req.params.id;
+
+  const result = await UserService.findOneUser(id);
+  return responseData({ message: "User fetched successfully", result }, res);
+});
+
+const updateUser = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  const user = (req as any).user as IValidateUser;
+
+  const result = await UserService.updateUser(id, data, user);
+
+  return responseData({ message: "User updated successfully", result }, res);
+});
+
+const userProfile = catchAsync(async (req, res) => {
+  const user = (req as any).user as IValidateUser;
+
+  const result = await UserService.findOneUser(user.userId);
+  return responseData(
+    { message: "User profile fetched successfully", result },
+    res
+  );
+});
+
 const updatePassword = catchAsync(async (req, res) => {
   const data = req.body as IUpdatePassword;
   const user = (req as any).user as IValidateUser;
@@ -77,6 +69,14 @@ const updatePassword = catchAsync(async (req, res) => {
     { message: "Password updated successfully", result },
     res
   );
+});
+
+const deleteUser = catchAsync(async (req, res) => {
+  const id = req.params.id;
+
+  const result = await UserService.deleteUser(id);
+
+  return responseData({ message: "User deleted successfully", result }, res);
 });
 
 export const UserController = {

@@ -5,7 +5,7 @@ import {
   PaymentStatus,
 } from "@prisma/client";
 
-export interface IUserFilterOption {
+export interface IBookingFilterOption {
   search?: string;
   status?: BookingStatus;
   bookingType?: BookingType;
@@ -16,6 +16,7 @@ export interface IUserFilterOption {
   paymentStatus?: PaymentStatus;
   departureDate?: Date;
   deliveryDate?: Date;
-  startDate?: Date;
-  endDate?: Date;
+  minTotal?: number;
+  maxTotal?: number;
+  createdDateRange?: Date[];
 }

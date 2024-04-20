@@ -8,7 +8,8 @@ import { BookingValidation } from "./bookings.validation";
 const router = express.Router();
 
 router
-  .route("/create-booking")
+  .route("/")
+  .get(auth(Role.admin, Role.super_admin), BookingController.findBookings)
   .post(
     validateRequest(BookingValidation.createBookingZodSchema),
     auth(Role.customer),
@@ -16,22 +17,8 @@ router
   );
 
 router
-  .route("/")
-  .get(
-    auth(Role.super_admin, Role.admin, Role.customer),
-    BookingController.findBookings
-  );
-
-router
   .route("/my-bookings")
   .get(auth(Role.customer), BookingController.findMyBookings);
-
-router
-  .route("/:lorryId/lorry")
-  .get(
-    auth(Role.super_admin, Role.admin),
-    BookingController.findBookingByLorry
-  );
 
 router
   .route("/:id")
@@ -44,5 +31,7 @@ router
     auth(Role.admin, Role.super_admin, Role.customer),
     BookingController.updateBookingBooking
   );
+
+//Update status
 
 export const BookingRouter = router;
