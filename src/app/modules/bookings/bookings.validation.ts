@@ -1,40 +1,44 @@
 import { z } from "zod";
 const createBookingZodSchema = z.object({
   body: z.object({
-    startTime: z.string({
-      required_error: "Start time and date is required!",
+    bookingType: z
+      .enum(["Package", "Custom"], {
+        required_error: "Booking type is required!",
+      })
+      .default("Package"),
+    serviceId: z.string({
+      required_error: "ServiceId is required!",
     }),
-    endTime: z.string({
-      required_error: "End time and date is required!",
+    packageId: z.string().optional(),
+    departureDate: z.date({
+      required_error: "Departure Date is required!",
     }),
-    lorryId: z.string({
-      required_error: "End time and date is required!",
+    deliveryDate: z.date({
+      required_error: "Delivery Date is required!",
     }),
+    shippingAddress: z.string({
+      required_error: "Shipping Address is required!",
+    }),
+    pickingAddress: z.string().optional(),
+    remarks: z.string().optional(),
+    paymentMethod: z
+      .enum(["COD", "Stripe", "SSLCommerze"], {
+        required_error: "Payment Method is required!",
+      })
+      .default("COD"),
   }),
 });
 
 const updateBookingZodSchema = z.object({
   body: z.object({
-    startTime: z
-      .string({
-        required_error: "Start time and date is required!",
-      })
-      .optional(),
-    endTime: z
-      .string({
-        required_error: "End time and date is required!",
-      })
-      .optional(),
-    lorryId: z
-      .string({
-        required_error: "End time and date is required!",
-      })
-      .optional(),
-    status: z
-      .enum(["Pending", "Booked", "Cancelled", "Rejected", "Completed"], {
-        required_error: "End time and date is required!",
-      })
-      .optional(),
+    bookingType: z.enum(["Package", "Custom"]).optional(),
+    packageId: z.string().optional(),
+    departureDate: z.date().optional(),
+    deliveryDate: z.date().optional(),
+    shippingAddress: z.string().optional(),
+    pickingAddress: z.string().optional(),
+    remarks: z.string().optional(),
+    paymentMethod: z.enum(["COD", "Stripe", "SSLCommerze"]).optional(),
   }),
 });
 

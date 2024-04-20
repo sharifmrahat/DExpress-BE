@@ -46,6 +46,8 @@ model Service {
   packages Package[]
   bookings Booking[]
 
+  totalBooking Int @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isActive Boolean @default(true)
@@ -65,6 +67,8 @@ model Package {
 
   bookings Booking[]
 
+  totalBooking Int @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isActive Boolean @default(true)
@@ -73,10 +77,9 @@ model Package {
   @@map("packages")
 }
 
-
 model Booking {
   id String @unique @default(uuid())
-  bkId String? @unique
+  bkId String @unique
 
   bookingType BookingType @default(Package)
 
@@ -103,7 +106,7 @@ model Booking {
   paymentStatus PaymentStatus @default(Unpaid)
   transactionId String?
 
-  status BookingStatus @default(Processing)
+  status BookingStatus @default(Created)
 
   review Review?
 
@@ -135,7 +138,6 @@ model BookingLog {
 
   @@map("bookingLogs")
 }
-
 
 model Review {
   id String @unique @default(uuid())
@@ -186,6 +188,8 @@ model Article {
   userId String
   user User @relation(fields: [userId], references: [id])
 
+  totalReading Int @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isActive Boolean @default(true)
@@ -206,17 +210,18 @@ enum BookingType {
 }
 
 enum BookingStatus {
-  Processing
+  Drafted
+  Created
   Confirmed
   Cancelled
-  In_Transit
   Shipped
+  Delivered
 }
 
 enum PaymentMethod {
  COD
- Card
- Bank
+ Stripe
+ SSLCommerze
 }
 
 enum PaymentStatus {

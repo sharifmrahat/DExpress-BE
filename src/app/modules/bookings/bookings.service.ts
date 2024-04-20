@@ -3,7 +3,8 @@ import {
   BookingStatus,
   Prisma,
   Role,
-  LorryStatus,
+  BookingType,
+  PaymentMethod,
 } from "@prisma/client";
 import httpStatus from "http-status";
 import ApiError from "../../../errors/api-error";
@@ -13,46 +14,66 @@ import paginationHelpers, {
 import prismaClient from "../../../shared/prisma-client";
 import { IValidateUser } from "../auth/auth.interface";
 import { IFilterOption } from "../lorries/lorries.interface";
-import { BookingUtils } from "./bookings.utils";
+import { makeId } from "../../../utils/makeUid";
 
 const insertBooking = async (payload: Booking): Promise<Booking> => {
   return await prismaClient.$transaction(async (trxClient) => {
-    const existBooking = await trxClient.booking.findMany({
+    const selectedService = await trxClient.service.findUnique({
+      where: { id: payload.serviceId },
+    });
+    if (!selectedService) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Service not exist");
+    }
+
+    const existBooking = await trxClient.booking.findFirst({
       where: {
-        lorryId: payload.lorryId,
-        status: {
-          in: [BookingStatus.Pending, BookingStatus.Booked],
-        },
+        userId: payload.userId,
+        serviceId: selectedService.id,
+        status: BookingStatus.Created,
       },
     });
 
-    if (existBooking.length)
-      throw new ApiError(httpStatus.CONFLICT, "This lorry already booked");
+    if (existBooking)
+      throw new ApiError(
+        httpStatus.CONFLICT,
+        `This Service already booked by you, BookingId: ${existBooking.bkId}, status: ${existBooking.status}`
+      );
 
-    if (!payload.status) payload.status = BookingStatus.Pending;
+    if (payload.packageId) {
+      const selectedPackage = await trxClient.package.findUnique({
+        where: { id: payload.packageId },
+      });
+      if (!selectedPackage) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Package not exist");
+      }
+      payload.packageId = selectedPackage.id;
+      payload.totalCost = selectedPackage.price;
+    }
 
-    const total = await BookingUtils.calculateTotal(
-      payload.startTime,
-      payload.endTime,
-      payload.lorryId
-    );
+    if (
+      payload.bookingType === BookingType.Custom ||
+      payload.paymentMethod !== PaymentMethod.COD
+    ) {
+      payload.status = BookingStatus.Drafted;
+    }
+
+    const bkId = makeId("DXBK");
+    payload.bkId = bkId;
 
     const createdBooking = await trxClient.booking.create({
-      data: { ...payload, total },
+      data: payload,
     });
 
     if (!createdBooking)
-      throw new ApiError(httpStatus.BAD_REQUEST, "booking has failed!");
+      throw new ApiError(httpStatus.BAD_REQUEST, "Failed to book the service");
 
-    await trxClient.lorry.update({
-      where: {
-        id: createdBooking.lorryId,
-      },
+    await trxClient.bookingLog.create({
       data: {
-        status: LorryStatus.Booked,
+        userId: createdBooking.userId,
+        bookingId: createdBooking.id,
+        currentStatus: createdBooking.status,
       },
     });
-
     return createdBooking;
   });
 };
@@ -63,102 +84,54 @@ const updateBooking = async (
   user: IValidateUser
 ): Promise<Booking> => {
   return await prismaClient.$transaction(async (trxClient) => {
+    if (user.role === Role.customer && id !== user.userId) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized");
+    }
+
     const exist = await trxClient.booking.findUnique({
       where: {
         id,
+        userId: user.userId,
       },
     });
-    if (user.role === Role.customer && exist?.userId !== user.userId) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized");
-    }
+
     if (!exist) throw new ApiError(httpStatus.NOT_FOUND, "Booking not found!");
 
-    if (payload.status) {
-      if (
-        (exist.status === BookingStatus.Pending &&
-          !(
-            BookingStatus.Booked === payload.status ||
-            BookingStatus.Rejected === payload.status ||
-            BookingStatus.Cancelled === payload.status
-          )) ||
-        (exist.status === BookingStatus.Booked &&
-          !(
-            BookingStatus.Cancelled === payload.status ||
-            BookingStatus.Completed === payload.status
-          )) ||
-        exist.status === BookingStatus.Cancelled ||
-        exist.status === BookingStatus.Rejected ||
-        exist.status === BookingStatus.Completed
-      ) {
-        throw new ApiError(
-          httpStatus.NOT_ACCEPTABLE,
-          "Invalid status can not proceed"
-        );
-      }
-      if (payload.status && exist.status !== payload.status) {
-        if (
-          !(
-            payload.status === BookingStatus.Pending ||
-            payload.status === BookingStatus.Cancelled
-          )
-        ) {
-          if (user.role === Role.customer)
-            throw new ApiError(
-              httpStatus.NOT_ACCEPTABLE,
-              "Only Admin can update"
-            );
-        } else {
-          if (user.role !== Role.customer)
-            throw new ApiError(
-              httpStatus.NOT_ACCEPTABLE,
-              "Only Customer can update"
-            );
-        }
-      }
-
-      const existBooking = await trxClient.booking.findMany({
-        where: {
-          lorryId: payload.lorryId ?? exist.lorryId,
-          status: {
-            in: [BookingStatus.Pending, BookingStatus.Booked],
-          },
-          id: {
-            not: id,
-          },
-        },
+    if (payload.packageId) {
+      const selectedPackage = await trxClient.package.findUnique({
+        where: { id: payload.packageId },
       });
-
-      if (existBooking.length)
-        throw new ApiError(httpStatus.CONFLICT, "This lorry is already booked");
+      if (!selectedPackage) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Package not exist");
+      }
+      payload.totalCost = selectedPackage.price;
     }
 
-    const total = await BookingUtils.calculateTotal(
-      payload.startTime ?? exist.startTime,
-      payload.endTime ?? exist.endTime,
-      payload.lorryId ?? exist.lorryId
-    );
+    if (
+      payload.bookingType === BookingType.Custom ||
+      payload.paymentMethod !== PaymentMethod.COD
+    ) {
+      payload.status = BookingStatus.Drafted;
+    }
 
     const updatedBooking = await trxClient.booking.update({
       where: {
         id,
+        userId: user.userId,
       },
-      data: { ...payload, total },
+      data: payload,
     });
 
-    if (
-      exist.status !== updatedBooking.status &&
-      (updatedBooking.status === BookingStatus.Cancelled ||
-        updatedBooking.status === BookingStatus.Completed ||
-        updatedBooking.status === BookingStatus.Rejected)
-    )
-      await trxClient.lorry.update({
-        where: {
-          id: updatedBooking.lorryId,
-        },
-        data: {
-          status: LorryStatus.Available,
-        },
-      });
+    // await trxClient.lorry.update({
+    //   where: {
+    //     id: updatedBooking.lorryId,
+    //   },
+    //   data: {
+    //     status: LorryStatus.Available,
+    //   },
+    // });
+
+    //update booking log
 
     return updatedBooking;
   });

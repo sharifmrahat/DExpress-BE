@@ -1,6 +1,8 @@
+import { Role } from "@prisma/client";
+
 export interface IUserFilterOption {
   search?: string;
-  role?: string;
+  role?: Role;
 }
 
 export interface IUpdatePassword {

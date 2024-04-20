@@ -7,6 +7,7 @@ import { IArticleFilterOption } from "./articles.interface";
 import paginationHelpers, {
   IPaginationOption,
 } from "../../../helpers/pagination-helpers";
+import { makeId } from "../../../utils/makeUid";
 
 const insertArticle = async (payload: Article): Promise<Article> => {
   const articleExist = await prismaClient.article.findFirst({
@@ -56,7 +57,7 @@ const findArticles = async (
   }
 
   if (validateUser && validateUser.role === Role.super_admin && status) {
-    andCondition.push({ status: status as ArticleStatus });
+    andCondition.push({ status: status });
   }
 
   if (search)
@@ -114,6 +115,13 @@ const findOneArticle = async (id: string): Promise<Article | null> => {
 
   if (!articleExist)
     throw new ApiError(httpStatus.NOT_FOUND, "Article not exists");
+
+  await prismaClient.article.update({
+    where: {
+      id,
+    },
+    data: { totalReading: articleExist.totalReading + 1 },
+  });
 
   return articleExist;
 };
