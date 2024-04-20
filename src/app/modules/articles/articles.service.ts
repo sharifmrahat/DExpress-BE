@@ -76,7 +76,15 @@ const findArticles = async (
   const articles = await prismaClient.article.findMany({
     where: whereCondition,
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
     },
     skip,
     take: limit,
@@ -109,7 +117,15 @@ const findOneArticle = async (id: string): Promise<Article | null> => {
       id,
     },
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
     },
   });
 
@@ -166,7 +182,15 @@ const findArticlesByUserId = async (
   const articles = await prismaClient.article.findMany({
     where: whereCondition,
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
     },
     skip,
     take: limit,

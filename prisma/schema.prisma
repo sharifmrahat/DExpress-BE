@@ -93,11 +93,10 @@ model Booking {
   packageId String?
   package Package? @relation(fields: [packageId], references: [id])
 
-  departureDate DateTime
   deliveryDate DateTime
 
-  pickingAddress String?
   shippingAddress String
+  billingAddress String
 
   totalCost Int @default(0)
 

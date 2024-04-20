@@ -10,16 +10,17 @@ const createBookingZodSchema = z.object({
       required_error: "ServiceId is required!",
     }),
     packageId: z.string().optional(),
-    departureDate: z.date({
-      required_error: "Departure Date is required!",
-    }),
-    deliveryDate: z.date({
-      required_error: "Delivery Date is required!",
-    }),
+    deliveryDate: z
+      .string({
+        required_error: "Delivery Date is required!",
+      })
+      .transform((str) => new Date(str)),
     shippingAddress: z.string({
       required_error: "Shipping Address is required!",
     }),
-    pickingAddress: z.string().optional(),
+    billingAddress: z.string({
+      required_error: "Billing Address is required!",
+    }),
     remarks: z.string().optional(),
     paymentMethod: z
       .enum(["COD", "Stripe", "SSLCommerze"], {
@@ -33,10 +34,12 @@ const updateBookingZodSchema = z.object({
   body: z.object({
     bookingType: z.enum(["Package", "Custom"]).optional(),
     packageId: z.string().optional(),
-    departureDate: z.date().optional(),
-    deliveryDate: z.date().optional(),
+    deliveryDate: z
+      .string()
+      .transform((str) => new Date(str))
+      .optional(),
     shippingAddress: z.string().optional(),
-    pickingAddress: z.string().optional(),
+    billingAddress: z.string().optional(),
     remarks: z.string().optional(),
     paymentMethod: z.enum(["COD", "Stripe", "SSLCommerze"]).optional(),
   }),

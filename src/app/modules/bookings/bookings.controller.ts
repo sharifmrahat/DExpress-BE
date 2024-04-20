@@ -19,7 +19,7 @@ const findBookings = catchAsync(async (req, res) => {
   const query = req.query;
   const paginationOptions = pick(query, [
     "page",
-    "size",
+    "limit",
     "sortBy",
     "sortOrder",
   ]);
@@ -32,7 +32,6 @@ const findBookings = catchAsync(async (req, res) => {
     "packageId",
     "paymentMethod",
     "paymentStatus",
-    "departureDate",
     "deliveryDate",
     "minTotal",
     "maxTotal",
@@ -63,7 +62,7 @@ const findMyBookings = catchAsync(async (req, res) => {
   const query = req.query;
   const paginationOptions = pick(query, [
     "page",
-    "size",
+    "limit",
     "sortBy",
     "sortOrder",
   ]);
@@ -75,7 +74,6 @@ const findMyBookings = catchAsync(async (req, res) => {
     "packageId",
     "paymentMethod",
     "paymentStatus",
-    "departureDate",
     "deliveryDate",
     "minTotal",
     "maxTotal",

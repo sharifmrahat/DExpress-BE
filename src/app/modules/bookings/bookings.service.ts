@@ -42,10 +42,13 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
 
     if (payload.packageId) {
       const selectedPackage = await trxClient.package.findUnique({
-        where: { id: payload.packageId },
+        where: { id: payload.packageId, serviceId: selectedService.id },
       });
       if (!selectedPackage) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Package not exist");
+        throw new ApiError(
+          httpStatus.NOT_FOUND,
+          "Package not exist for this service"
+        );
       }
       payload.packageId = selectedPackage.id;
       payload.totalCost = selectedPackage.price;
@@ -118,7 +121,7 @@ const findAllBookings = async (
 
   if (search)
     andCondition.push({
-      OR: ["bkId", "bookingType", "remarks", "status"].map((field) => ({
+      OR: ["bkId", "remarks"].map((field) => ({
         [field]: {
           contains: search,
           mode: "insensitive",
@@ -132,14 +135,30 @@ const findAllBookings = async (
   const bookings = await prismaClient.booking.findMany({
     where: { ...whereCondition, isDeleted: false },
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
       service: true,
       package: true,
       review: true,
       payments: true,
       bookingLogs: {
         include: {
-          updatedBy: true,
+          updatedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              imageUrl: true,
+            },
+          },
         },
       },
     },
@@ -171,10 +190,6 @@ const findOneBooking = async (
   id: string,
   user: IValidateUser
 ): Promise<Booking | null> => {
-  if (user.role === Role.customer && user.userId !== id) {
-    throw new ApiError(httpStatus.FORBIDDEN, "Forbidden Access!");
-  }
-
   const bookingExist = await prismaClient.booking.findUnique({
     where: {
       id,
@@ -182,18 +197,39 @@ const findOneBooking = async (
       userId: user.userId,
     },
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
       service: true,
       package: true,
       review: true,
       payments: true,
       bookingLogs: {
         include: {
-          updatedBy: true,
+          updatedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              imageUrl: true,
+            },
+          },
         },
       },
     },
   });
+
+  if (user.role === Role.customer && user.userId !== bookingExist?.userId) {
+    throw new ApiError(httpStatus.FORBIDDEN, "Forbidden Access!");
+  }
+
   if (!bookingExist)
     throw new ApiError(httpStatus.NOT_FOUND, "Booking does not exist!");
 
@@ -241,7 +277,7 @@ const findMyBookings = async (
 
   if (search)
     andCondition.push({
-      OR: ["bkId", "bookingType", "remarks", "status"].map((field) => ({
+      OR: ["bkId", "remarks"].map((field) => ({
         [field]: {
           contains: search,
           mode: "insensitive",
@@ -255,14 +291,30 @@ const findMyBookings = async (
   const bookings = await prismaClient.booking.findMany({
     where: { ...whereCondition, isDeleted: false },
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
       service: true,
       package: true,
       review: true,
       payments: true,
       bookingLogs: {
         include: {
-          updatedBy: true,
+          updatedBy: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              imageUrl: true,
+            },
+          },
         },
       },
     },
@@ -297,10 +349,6 @@ const updateBooking = async (
   user: IValidateUser
 ): Promise<Booking> => {
   return await prismaClient.$transaction(async (trxClient) => {
-    if (user.role === Role.customer && id !== user.userId) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized");
-    }
-
     const exist = await trxClient.booking.findUnique({
       where: {
         id,
@@ -311,12 +359,19 @@ const updateBooking = async (
 
     if (!exist) throw new ApiError(httpStatus.NOT_FOUND, "Booking not found!");
 
+    if (user.role === Role.customer && user.userId !== exist.userId) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized");
+    }
+
     if (payload.packageId) {
       const selectedPackage = await trxClient.package.findUnique({
-        where: { id: payload.packageId },
+        where: { id: payload.packageId, serviceId: exist.serviceId },
       });
       if (!selectedPackage) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Package not exist");
+        throw new ApiError(
+          httpStatus.NOT_FOUND,
+          "Package not exist this service"
+        );
       }
       payload.totalCost = selectedPackage.price;
     }
@@ -380,9 +435,6 @@ const deleteBooking = async (
   id: string,
   user: IValidateUser
 ): Promise<Booking | null> => {
-  if (user.role === Role.customer && id !== user.userId) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized");
-  }
   const bookingExist = await prismaClient.booking.findUnique({
     where: {
       id,
@@ -393,6 +445,10 @@ const deleteBooking = async (
 
   if (!bookingExist)
     throw new ApiError(httpStatus.NOT_FOUND, "Booking not exists");
+
+  if (user.role === Role.customer && user.userId !== bookingExist.userId) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized access");
+  }
 
   const booking = await prismaClient.booking.update({
     where: {

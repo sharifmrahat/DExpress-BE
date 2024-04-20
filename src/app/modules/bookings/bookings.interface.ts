@@ -14,7 +14,6 @@ export interface IBookingFilterOption {
   packageId?: string;
   paymentMethod?: PaymentMethod;
   paymentStatus?: PaymentStatus;
-  departureDate?: Date;
   deliveryDate?: Date;
   minTotal?: number;
   maxTotal?: number;

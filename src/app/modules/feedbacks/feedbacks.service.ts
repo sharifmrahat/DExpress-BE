@@ -13,7 +13,13 @@ const insertFeedback = async (payload: Feedback): Promise<Feedback> => {
     where: {
       userId: payload.userId,
       NOT: {
-        status: BookingStatus.Processing,
+        status: {
+          in: [
+            BookingStatus.Drafted,
+            BookingStatus.Created,
+            BookingStatus.Cancelled,
+          ],
+        },
       },
     },
   });
@@ -77,7 +83,15 @@ const findFeedbacks = async (
   const feedbacks = await prismaClient.feedback.findMany({
     where: whereCondition,
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
     },
     skip,
     take: limit,
@@ -110,7 +124,15 @@ const findOneFeedback = async (id: string): Promise<Feedback | null> => {
       id,
     },
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
     },
   });
 
@@ -150,7 +172,15 @@ const findFeedbacksByUserId = async (
   const feedbacks = await prismaClient.feedback.findMany({
     where: whereCondition,
     include: {
-      user: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
     },
     skip,
     take: limit,
