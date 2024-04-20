@@ -10,10 +10,7 @@ const insertArticle = catchAsync(async (req, res) => {
   if (user) article.userId = user.userId;
 
   const result = await ArticleService.insertArticle(article);
-  return responseData(
-    { message: "Article inserted  successfully", result },
-    res
-  );
+  return responseData({ message: "Article created successfully", result }, res);
 });
 
 const findArticles = catchAsync(async (req, res) => {

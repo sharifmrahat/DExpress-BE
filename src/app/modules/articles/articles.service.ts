@@ -193,7 +193,9 @@ const updateArticle = async (
   const articleExist = await prismaClient.article.findUnique({
     where: {
       id,
-      userId: validateUser.userId,
+      ...(validateUser.role !== Role.super_admin && {
+        userId: validateUser.userId,
+      }),
     },
   });
 
@@ -203,7 +205,9 @@ const updateArticle = async (
   const article = await prismaClient.article.update({
     where: {
       id,
-      userId: validateUser.userId,
+      ...(validateUser.role !== Role.super_admin && {
+        userId: validateUser.userId,
+      }),
     },
     data: payload,
   });
