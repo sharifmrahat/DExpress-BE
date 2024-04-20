@@ -108,8 +108,8 @@ const updateBooking = async (
     }
 
     if (
-      payload.bookingType === BookingType.Custom ||
-      payload.paymentMethod !== PaymentMethod.COD
+      (payload.bookingType && payload.bookingType === BookingType.Custom) ||
+      (payload.paymentMethod && payload.paymentMethod !== PaymentMethod.COD)
     ) {
       payload.status = BookingStatus.Drafted;
     }
@@ -121,17 +121,6 @@ const updateBooking = async (
       },
       data: payload,
     });
-
-    // await trxClient.lorry.update({
-    //   where: {
-    //     id: updatedBooking.lorryId,
-    //   },
-    //   data: {
-    //     status: LorryStatus.Available,
-    //   },
-    // });
-
-    //update booking log
 
     return updatedBooking;
   });

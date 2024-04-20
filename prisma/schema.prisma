@@ -21,6 +21,7 @@ model User {
   imageUrl String?
 
   bookings Booking[]
+  payments Payment[]
   bookingLogs BookingLog[]
   reviews Review[]
   feedback Feedback?
@@ -104,13 +105,14 @@ model Booking {
   
   paymentMethod PaymentMethod @default(COD)
   paymentStatus PaymentStatus @default(Unpaid)
-  transactionId String?
 
   status BookingStatus @default(Created)
 
   review Review?
 
   bookingLogs BookingLog[]
+
+  payments Payment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -137,6 +139,33 @@ model BookingLog {
   isDeleted Boolean @default(false)
 
   @@map("bookingLogs")
+}
+
+model Payment {
+  id String @unique @default(uuid())
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  bookingId String
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  paymentMethod PaymentMethod @default(COD)
+
+  totalAmount Int @default(0)
+
+  transactionId String?
+
+  provider String?
+
+  status PaymentStatus @default(Unpaid)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
+
+  @@map("payments")
 }
 
 model Review {
@@ -226,6 +255,7 @@ enum PaymentMethod {
 
 enum PaymentStatus {
  Unpaid
+ Partial_Paid
  Paid
 }
 
