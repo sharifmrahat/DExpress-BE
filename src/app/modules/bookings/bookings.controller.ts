@@ -97,7 +97,7 @@ const findMyBookings = catchAsync(async (req, res) => {
   );
 });
 
-const updateBookingBooking = catchAsync(async (req, res) => {
+const updateBooking = catchAsync(async (req, res) => {
   const booking = req.body;
   const { id } = req.params;
   const user = (req as any).user as IValidateUser;
@@ -107,14 +107,34 @@ const updateBookingBooking = catchAsync(async (req, res) => {
   return responseData({ message: "Booking updated successfully", result }, res);
 });
 
-//TODO: update status
+const updateBookingStatus = catchAsync(async (req, res) => {
+  const { status } = req.body;
+  const { id } = req.params;
+  const user = (req as any).user as IValidateUser;
 
-//TODO: delete booking (soft delete)
+  const result = await BookingService.updateBookingStatus(id, status, user);
+
+  return responseData(
+    { message: "Booking status updated successfully", result },
+    res
+  );
+});
+
+const deleteBooking = catchAsync(async (req, res) => {
+  const id = req.params?.id;
+  const user = (req as any).user as IValidateUser;
+
+  const result = await BookingService.deleteBooking(id, user);
+
+  return responseData({ message: "Booking deleted successfully", result }, res);
+});
 
 export const BookingController = {
   insertBooking,
   findOneBooking,
   findBookings,
-  updateBookingBooking,
   findMyBookings,
+  updateBooking,
+  updateBookingStatus,
+  deleteBooking,
 };

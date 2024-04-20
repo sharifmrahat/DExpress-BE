@@ -125,13 +125,13 @@ model Booking {
 model BookingLog {
   id String @unique @default(uuid())
 
-  userId String
-  user User @relation(fields: [userId], references: [id])
-
   bookingId String
   booking Booking @relation(fields: [bookingId], references: [id])
 
   currentStatus BookingStatus
+
+  updatedById String
+  updatedBy User @relation(fields: [updatedById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

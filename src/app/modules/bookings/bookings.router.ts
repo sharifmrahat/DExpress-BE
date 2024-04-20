@@ -11,8 +11,8 @@ router
   .route("/")
   .get(auth(Role.admin, Role.super_admin), BookingController.findBookings)
   .post(
-    validateRequest(BookingValidation.createBookingZodSchema),
     auth(Role.customer),
+    validateRequest(BookingValidation.createBookingZodSchema),
     BookingController.insertBooking
   );
 
@@ -21,17 +21,27 @@ router
   .get(auth(Role.customer), BookingController.findMyBookings);
 
 router
+  .route("/update-status/:id")
+  .patch(
+    auth(Role.admin, Role.super_admin),
+    validateRequest(BookingValidation.updateBookingStatusZodSchema),
+    BookingController.updateBookingStatus
+  );
+
+router
   .route("/:id")
   .get(
     auth(Role.super_admin, Role.admin, Role.customer),
     BookingController.findOneBooking
   )
   .patch(
-    validateRequest(BookingValidation.updateBookingZodSchema),
     auth(Role.admin, Role.super_admin, Role.customer),
-    BookingController.updateBookingBooking
+    validateRequest(BookingValidation.updateBookingZodSchema),
+    BookingController.updateBooking
+  )
+  .delete(
+    auth(Role.customer, Role.admin, Role.super_admin),
+    BookingController.deleteBooking
   );
-
-//Update status
 
 export const BookingRouter = router;

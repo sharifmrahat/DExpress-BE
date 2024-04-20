@@ -13,7 +13,6 @@ import paginationHelpers, {
 } from "../../../helpers/pagination-helpers";
 import prismaClient from "../../../shared/prisma-client";
 import { IValidateUser } from "../auth/auth.interface";
-import { IFilterOption } from "../lorries/lorries.interface";
 import { makeId } from "../../../utils/makeUid";
 import { IBookingFilterOption } from "./bookings.interface";
 
@@ -31,6 +30,7 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
         userId: payload.userId,
         serviceId: selectedService.id,
         status: BookingStatus.Created,
+        isDeleted: false,
       },
     });
 
@@ -70,9 +70,9 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
 
     await trxClient.bookingLog.create({
       data: {
-        userId: createdBooking.userId,
         bookingId: createdBooking.id,
         currentStatus: createdBooking.status,
+        updatedById: createdBooking.userId,
       },
     });
     return createdBooking;
@@ -130,14 +130,18 @@ const findAllBookings = async (
     andCondition.length > 0 ? { AND: andCondition } : {};
 
   const bookings = await prismaClient.booking.findMany({
-    where: whereCondition,
+    where: { ...whereCondition, isDeleted: false },
     include: {
       user: true,
       service: true,
       package: true,
       review: true,
       payments: true,
-      bookingLogs: true,
+      bookingLogs: {
+        include: {
+          updatedBy: true,
+        },
+      },
     },
     skip,
     take: limit,
@@ -149,7 +153,7 @@ const findAllBookings = async (
           },
   });
   const count = await prismaClient.booking.count({
-    where: whereCondition,
+    where: { ...whereCondition, isDeleted: false },
   });
 
   return {
@@ -174,6 +178,7 @@ const findOneBooking = async (
   const bookingExist = await prismaClient.booking.findUnique({
     where: {
       id,
+      isDeleted: false,
       userId: user.userId,
     },
     include: {
@@ -182,7 +187,11 @@ const findOneBooking = async (
       package: true,
       review: true,
       payments: true,
-      bookingLogs: true,
+      bookingLogs: {
+        include: {
+          updatedBy: true,
+        },
+      },
     },
   });
   if (!bookingExist)
@@ -244,14 +253,18 @@ const findMyBookings = async (
     andCondition.length > 0 ? { AND: andCondition } : {};
 
   const bookings = await prismaClient.booking.findMany({
-    where: whereCondition,
+    where: { ...whereCondition, isDeleted: false },
     include: {
       user: true,
       service: true,
       package: true,
       review: true,
       payments: true,
-      bookingLogs: true,
+      bookingLogs: {
+        include: {
+          updatedBy: true,
+        },
+      },
     },
     skip,
     take: limit,
@@ -264,7 +277,7 @@ const findMyBookings = async (
   });
 
   const count = await prismaClient.booking.count({
-    where: whereCondition,
+    where: { ...whereCondition, isDeleted: false },
   });
 
   return {
@@ -291,6 +304,7 @@ const updateBooking = async (
     const exist = await trxClient.booking.findUnique({
       where: {
         id,
+        isDeleted: false,
         ...(user.role === Role.customer && { userId: user.userId }),
       },
     });
@@ -317,7 +331,8 @@ const updateBooking = async (
     const updatedBooking = await trxClient.booking.update({
       where: {
         id,
-        userId: user.userId,
+        isDeleted: false,
+        ...(user.role === Role.customer && { userId: user.userId }),
       },
       data: payload,
     });
@@ -326,9 +341,69 @@ const updateBooking = async (
   });
 };
 
-//update status
-//update payment (from payment module after complete payment)
-//delete booking (owner only, soft delete)
+const updateBookingStatus = async (
+  id: string,
+  status: BookingStatus,
+  user: IValidateUser
+): Promise<Booking> => {
+  return await prismaClient.$transaction(async (trxClient) => {
+    const exist = await trxClient.booking.findUnique({
+      where: {
+        id,
+        isDeleted: false,
+      },
+    });
+
+    if (!exist) throw new ApiError(httpStatus.NOT_FOUND, "Booking not found!");
+
+    const updatedBooking = await trxClient.booking.update({
+      where: {
+        id,
+        isDeleted: false,
+      },
+      data: { status },
+    });
+
+    await trxClient.bookingLog.create({
+      data: {
+        bookingId: updatedBooking.id,
+        currentStatus: updatedBooking.status,
+        updatedById: user.userId,
+      },
+    });
+
+    return updatedBooking;
+  });
+};
+
+const deleteBooking = async (
+  id: string,
+  user: IValidateUser
+): Promise<Booking | null> => {
+  if (user.role === Role.customer && id !== user.userId) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized");
+  }
+  const bookingExist = await prismaClient.booking.findUnique({
+    where: {
+      id,
+      ...(user.role === Role.customer && { userId: user.userId }),
+      isDeleted: false,
+    },
+  });
+
+  if (!bookingExist)
+    throw new ApiError(httpStatus.NOT_FOUND, "Booking not exists");
+
+  const booking = await prismaClient.booking.update({
+    where: {
+      id,
+      ...(user.role === Role.customer && { userId: user.userId }),
+    },
+    data: { isDeleted: true },
+  });
+
+  return booking;
+};
 
 export const BookingService = {
   insertBooking,
@@ -336,4 +411,6 @@ export const BookingService = {
   findOneBooking,
   updateBooking,
   findMyBookings,
+  updateBookingStatus,
+  deleteBooking,
 };
