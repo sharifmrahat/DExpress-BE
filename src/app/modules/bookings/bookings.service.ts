@@ -413,6 +413,9 @@ const updateBookingStatus = async (
     if (!existingBooking)
       throw new ApiError(httpStatus.NOT_FOUND, "Booking not found!");
 
+    const payload: Partial<Booking> = { status };
+    let eligibleStatuses: BookingStatus[] = [];
+
     if (existingBooking.status === BookingStatus.Delivered) {
       throw new ApiError(httpStatus.CONFLICT, "Booking already delivered!");
     }
@@ -423,8 +426,6 @@ const updateBookingStatus = async (
         "Can not update same booking status"
       );
     }
-
-    let eligibleStatuses: BookingStatus[] = [];
 
     if (existingBooking.status === BookingStatus.Drafted) {
       eligibleStatuses = [BookingStatus.Created, BookingStatus.Cancelled];
@@ -467,8 +468,6 @@ const updateBookingStatus = async (
         `Can not confirm booking! payment method: ${existingBooking.paymentMethod}, payment status: ${existingBooking.paymentStatus}`
       );
     }
-
-    const payload: Partial<Booking> = { status };
 
     if (
       eligibleStatuses.includes(status) &&

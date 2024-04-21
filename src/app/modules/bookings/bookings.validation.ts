@@ -48,7 +48,15 @@ const updateBookingZodSchema = z.object({
 const updateBookingStatusZodSchema = z.object({
   body: z.object({
     status: z.enum(
-      ["Drafted", "Created", "Confirmed", "Cancelled", "Shipped", "Delivered"],
+      [
+        "Drafted",
+        "Created",
+        "Cancelled",
+        "Reverted",
+        "Confirmed",
+        "Shipped",
+        "Delivered",
+      ],
       {
         required_error: "Status is required!",
       }
