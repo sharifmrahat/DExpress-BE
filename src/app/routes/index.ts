@@ -7,6 +7,7 @@ import { FeedbackRouter } from "../modules/feedbacks/feedbacks.router";
 import { ArticleRouter } from "../modules/articles/articles.router";
 import { BookingRouter } from "../modules/bookings/bookings.router";
 import { BookingLogRouter } from "../modules/booking-logs/booking-logs.router";
+import { ReviewRouter } from "../modules/reviews/reviews.router";
 const router = express.Router();
 
 const routes = [
@@ -16,10 +17,10 @@ const routes = [
   { path: "/packages", module: PackageRouter },
   { path: "/bookings", module: BookingRouter },
   { path: "/booking-logs", module: BookingLogRouter },
-  // { path: "/payment", module: BookingLogRouter },
-  // { path: "/reviews", module: BookingLogRouter },
+  { path: "/reviews", module: ReviewRouter },
   { path: "/feedbacks", module: FeedbackRouter },
   { path: "/articles", module: ArticleRouter },
+  // { path: "/payment", module: BookingLogRouter },
 ];
 
 routes.forEach((route) => {

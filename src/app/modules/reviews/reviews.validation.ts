@@ -1,35 +1,27 @@
 import { z } from "zod";
 const createReviewZodSchema = z.object({
   body: z.object({
-    review: z.string({
-      required_error: "review is required!",
-    }),
-    rating: z.number({
-      required_error: "rating is required!",
-    }),
     bookingId: z.string({
-      required_error: "Booking id is required!",
+      required_error: "BookingId is required!",
     }),
+    rating: z
+      .number({
+        required_error: "Rating is required!",
+      })
+      .transform((value) => value.toFixed(1)),
+    description: z.string().optional(),
+    imageUrls: z.array(z.string()).optional(),
   }),
 });
 
 const updateReviewZodSchema = z.object({
   body: z.object({
-    review: z
-      .string({
-        required_error: "review is required!",
-      })
-      .optional(),
     rating: z
-      .number({
-        required_error: "rating is required!",
-      })
+      .number()
+      .transform((value) => value.toFixed(1))
       .optional(),
-    bookingId: z
-      .string({
-        required_error: "Booking id is required!",
-      })
-      .optional(),
+    description: z.string().optional(),
+    imageUrls: z.array(z.string()).optional(),
   }),
 });
 

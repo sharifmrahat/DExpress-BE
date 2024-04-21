@@ -169,8 +169,8 @@ model Payment {
 
 model Review {
   id String @unique @default(uuid())
-  description String
-  rating Float 
+  description String?
+  rating Float
   imageUrls String[]
 
   userId String
@@ -264,3 +264,12 @@ enum ArticleStatus {
  Published
  Archived
 }
+
+//TODO: Scope of enhancement:  
+//? Quotation Service
+//? CRM Service
+//? Push Notification
+//? Email
+//? Login with OTP
+//? Reset Password with OTP (web hook)
+//? Realtime chat feature

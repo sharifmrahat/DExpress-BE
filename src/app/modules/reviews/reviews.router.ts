@@ -8,21 +8,24 @@ import validateRequest from "../../middlewares/validate-request";
 const router = express.Router();
 
 router
-  .route("/create-review")
+  .route("/")
+  .get(ReviewController.findAllReviews)
   .post(
-    validateRequest(ReviewValidation.createReviewZodSchema),
     auth(Role.customer),
+    validateRequest(ReviewValidation.createReviewZodSchema),
     ReviewController.insertReview
   );
 
-router.route("/").get(ReviewController.findReviews);
+router
+  .route("/my-reviews")
+  .get(auth(Role.customer), ReviewController.findMyReviews);
 
 router
   .route("/:id")
   .get(ReviewController.findOneReview)
   .patch(
-    validateRequest(ReviewValidation.updateReviewZodSchema),
     auth(Role.customer),
+    validateRequest(ReviewValidation.updateReviewZodSchema),
     ReviewController.updateReview
   )
   .delete(auth(Role.customer), ReviewController.deleteReview);

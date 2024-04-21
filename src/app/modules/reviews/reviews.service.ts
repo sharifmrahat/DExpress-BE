@@ -1,28 +1,45 @@
 import httpStatus from "http-status";
 import prismaClient from "../../../shared/prisma-client";
-import { BookingStatus, Review } from "@prisma/client";
+import { BookingStatus, Prisma, Review } from "@prisma/client";
 import ApiError from "../../../errors/api-error";
+import { IReviewFilterOption } from "./reviews.interface";
+import paginationHelpers, {
+  IPaginationOption,
+} from "../../../helpers/pagination-helpers";
+import { IValidateUser } from "../auth/auth.interface";
 
 const insertReview = async (payload: Review): Promise<Review> => {
+  const bookingExist = await prismaClient.booking.findUnique({
+    where: {
+      id: payload.bookingId,
+      userId: payload.userId,
+      status: BookingStatus.Delivered,
+    },
+  });
+  if (!bookingExist)
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "No delivered booking is found to review"
+    );
+
   const reviewExist = await prismaClient.review.findFirst({
     where: {
-      userId: payload.userId,
-      bookingId: payload.userId,
+      userId: bookingExist.userId,
+      bookingId: bookingExist.id,
     },
   });
   if (reviewExist)
-    throw new ApiError(httpStatus.CONFLICT, "Review and rating already exist!");
+    throw new ApiError(
+      httpStatus.CONFLICT,
+      "Review already exist for this booking!"
+    );
 
-  const booking = await prismaClient.booking.findUnique({
-    where: {
-      id: payload.bookingId,
-    },
-  });
-  if (booking?.status !== BookingStatus.Completed)
+  if (payload.rating < 1 || payload.rating > 5) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      "Review and rating only for completed booking!"
+      "Rating must be greater than 1 and less than 5"
     );
+  }
 
   const createdReview = await prismaClient.review.create({
     data: payload,
@@ -31,52 +48,160 @@ const insertReview = async (payload: Review): Promise<Review> => {
   return createdReview;
 };
 
-const updateReview = async (
-  id: string,
-  payload: Review
-): Promise<Review | null> => {
-  const reviewExist = await prismaClient.review.findUnique({
-    where: {
-      id,
+const findAllReviews = async (
+  filterOptions: IReviewFilterOption,
+  paginationOptions: IPaginationOption
+) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelpers(paginationOptions);
+
+  const andCondition = [];
+
+  const { search, ...options } = filterOptions;
+  if (Object.keys(options).length) {
+    andCondition.push({
+      AND: Object.entries(options).map(([field, value]) => {
+        return {
+          [field]: value,
+        };
+      }),
+    });
+  }
+
+  if (search)
+    andCondition.push({
+      OR: ["description"].map((field) => ({
+        [field]: {
+          contains: search,
+          mode: "insensitive",
+        },
+      })),
+    });
+
+  const whereCondition: Prisma.ReviewWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
+
+  const reviews = await prismaClient.review.findMany({
+    where: whereCondition,
+    include: {
+      booking: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
     },
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder
+        ? { [sortBy]: sortOrder }
+        : {
+            createdAt: "desc",
+          },
   });
 
-  if (!reviewExist)
-    throw new ApiError(httpStatus.NOT_FOUND, "Review and rating not exists");
-
-  const review = await prismaClient.review.update({
-    where: {
-      id,
-    },
-    data: payload,
+  const count = await prismaClient.review.count({
+    where: whereCondition,
   });
 
-  return review;
+  return {
+    meta: {
+      page,
+      limit,
+      total: count,
+      totalPage: !isNaN(count / limit) ? Math.ceil(count / limit) : 0,
+    },
+    data: reviews,
+  };
 };
 
-const deleteReview = async (id: string): Promise<Review | null> => {
-  const reviewExist = await prismaClient.review.findUnique({
-    where: {
-      id,
+const findMyReviews = async (
+  filterOptions: IReviewFilterOption,
+  paginationOptions: IPaginationOption,
+  validateUser: IValidateUser
+) => {
+  const { limit, page, skip, sortBy, sortOrder } =
+    paginationHelpers(paginationOptions);
+
+  const andCondition = [];
+
+  andCondition.push({ userId: validateUser.userId });
+
+  const { search } = filterOptions;
+
+  if (search)
+    andCondition.push({
+      OR: ["description"].map((field) => ({
+        [field]: {
+          contains: search,
+          mode: "insensitive",
+        },
+      })),
+    });
+
+  const whereCondition: Prisma.ReviewWhereInput =
+    andCondition.length > 0 ? { AND: andCondition } : {};
+
+  const reviews = await prismaClient.review.findMany({
+    where: whereCondition,
+    include: {
+      booking: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
     },
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder
+        ? { [sortBy]: sortOrder }
+        : {
+            createdAt: "desc",
+          },
   });
 
-  if (!reviewExist)
-    throw new ApiError(httpStatus.NOT_FOUND, "Review and rating not exists");
-
-  await prismaClient.review.delete({
-    where: {
-      id,
-    },
+  const count = await prismaClient.review.count({
+    where: whereCondition,
   });
 
-  return reviewExist;
+  return {
+    meta: {
+      page,
+      limit,
+      total: count,
+      totalPage: !isNaN(count / limit) ? Math.ceil(count / limit) : 0,
+    },
+    data: reviews,
+  };
 };
 
 const findOneReview = async (id: string): Promise<Review | null> => {
   const reviewExist = await prismaClient.review.findUnique({
     where: {
       id,
+    },
+    include: {
+      booking: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          imageUrl: true,
+        },
+      },
     },
   });
 
@@ -86,25 +211,68 @@ const findOneReview = async (id: string): Promise<Review | null> => {
   return reviewExist;
 };
 
-const findReviews = async (): Promise<Review[]> => {
-  const reviews = await prismaClient.review.findMany({
-    include: {
-      user: {
-        select: {
-          name: true,
-          imageUrl: true,
-        },
-      },
+const updateReview = async (
+  id: string,
+  payload: Review,
+  validateUser: IValidateUser
+): Promise<Review | null> => {
+  const reviewExist = await prismaClient.review.findUnique({
+    where: {
+      id,
+      userId: validateUser.userId,
     },
   });
 
-  return reviews;
+  if (!reviewExist)
+    throw new ApiError(httpStatus.NOT_FOUND, "Review does not exists");
+
+  if (payload.rating && (payload.rating < 1 || payload.rating > 5)) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Rating must be greater than 1 and less than 5"
+    );
+  }
+
+  const review = await prismaClient.review.update({
+    where: {
+      id,
+      userId: validateUser.userId,
+    },
+    data: payload,
+  });
+
+  return review;
+};
+
+const deleteReview = async (
+  id: string,
+  validateUser: IValidateUser
+): Promise<Review | null> => {
+  const reviewExist = await prismaClient.review.findUnique({
+    where: {
+      id,
+      userId: validateUser.userId,
+    },
+  });
+
+  if (!reviewExist)
+    throw new ApiError(httpStatus.NOT_FOUND, "Review does not exists");
+
+  await prismaClient.feedback.delete({
+    where: {
+      id,
+      userId: validateUser.userId,
+    },
+  });
+
+  return reviewExist;
 };
 
 export const ReviewService = {
   insertReview,
+  findAllReviews,
+  findMyReviews,
+  findOneReview,
   updateReview,
   deleteReview,
-  findOneReview,
-  findReviews,
 };
