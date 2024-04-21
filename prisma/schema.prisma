@@ -266,6 +266,7 @@ enum ArticleStatus {
 }
 
 //TODO: Scope of enhancement:  
+//? Update-Delete History Log
 //? Quotation Service
 //? CRM Service
 //? Push Notification

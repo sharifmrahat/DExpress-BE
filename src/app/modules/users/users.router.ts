@@ -11,7 +11,7 @@ router
   .route("/")
   .get(auth(Role.admin, Role.super_admin), UserController.findUsers)
   .post(
-    auth(Role.admin, Role.super_admin),
+    auth(Role.super_admin),
     validateRequest(UserValidation.createUserValidation),
     UserController.insertUser
   );
@@ -26,8 +26,8 @@ router
 router
   .route("/update-password")
   .patch(
+    auth(Role.customer, Role.admin, Role.super_admin),
     validateRequest(UserValidation.updatePasswordValidation),
-    auth(Role.admin, Role.super_admin, Role.customer),
     UserController.updatePassword
   );
 
@@ -35,10 +35,10 @@ router
   .route("/:id")
   .get(auth(Role.admin, Role.super_admin), UserController.findOneUser)
   .patch(
-    auth(Role.admin, Role.super_admin, Role.customer),
+    auth(Role.customer, Role.admin, Role.super_admin),
     validateRequest(UserValidation.updateUserValidation),
     UserController.updateUser
   )
-  .delete(auth(Role.admin, Role.super_admin), UserController.deleteUser);
+  .delete(auth(Role.super_admin), UserController.deleteUser);
 
 export const UserRouter = router;

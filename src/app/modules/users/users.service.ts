@@ -178,6 +178,10 @@ const updatePassword = async (
 
   if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
 
+  if (userExist.id !== validateUser.userId) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized access");
+  }
+
   const oldPassword = payload.password;
   const newPassword = payload.newPassword;
 

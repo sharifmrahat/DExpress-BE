@@ -354,14 +354,24 @@ const updateBooking = async (
       where: {
         id,
         isDeleted: false,
+        NOT: {
+          status: BookingStatus.Delivered,
+        },
         ...(user.role === Role.customer && { userId: user.userId }),
       },
     });
 
     if (!exist) throw new ApiError(httpStatus.NOT_FOUND, "Booking not found!");
 
+    if (exist.status === BookingStatus.Shipped) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        `Can not update ${exist.status} booking`
+      );
+    }
+
     if (user.role === Role.customer && user.userId !== exist.userId) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized");
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized access");
     }
 
     if (payload.packageId) {
