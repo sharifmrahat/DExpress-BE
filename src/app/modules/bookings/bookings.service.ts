@@ -5,6 +5,7 @@ import {
   Role,
   BookingType,
   PaymentMethod,
+  PaymentStatus,
 } from "@prisma/client";
 import httpStatus from "http-status";
 import ApiError from "../../../errors/api-error";
@@ -402,46 +403,50 @@ const updateBookingStatus = async (
   user: IValidateUser
 ): Promise<Booking> => {
   return await prismaClient.$transaction(async (trxClient) => {
-    const exist = await trxClient.booking.findUnique({
+    const existingBooking = await trxClient.booking.findUnique({
       where: {
         id,
         isDeleted: false,
       },
     });
 
-    if (!exist) throw new ApiError(httpStatus.NOT_FOUND, "Booking not found!");
+    if (!existingBooking)
+      throw new ApiError(httpStatus.NOT_FOUND, "Booking not found!");
 
-    let eligibleStatuses: BookingStatus[] = [];
-
-    if (status === exist.status) {
-      throw new ApiError(httpStatus.CONFLICT, "Can not update same status");
-    }
-
-    if (exist.status === BookingStatus.Delivered) {
+    if (existingBooking.status === BookingStatus.Delivered) {
       throw new ApiError(httpStatus.CONFLICT, "Booking already delivered!");
     }
 
-    if (exist.status === BookingStatus.Drafted) {
+    if (status === existingBooking.status) {
+      throw new ApiError(
+        httpStatus.CONFLICT,
+        "Can not update same booking status"
+      );
+    }
+
+    let eligibleStatuses: BookingStatus[] = [];
+
+    if (existingBooking.status === BookingStatus.Drafted) {
       eligibleStatuses = [BookingStatus.Created, BookingStatus.Cancelled];
     }
 
-    if (exist.status === BookingStatus.Created) {
+    if (existingBooking.status === BookingStatus.Created) {
       eligibleStatuses = [BookingStatus.Cancelled, BookingStatus.Confirmed];
     }
 
-    if (exist.status === BookingStatus.Cancelled) {
+    if (existingBooking.status === BookingStatus.Cancelled) {
       eligibleStatuses = [BookingStatus.Reverted];
     }
 
-    if (exist.status === BookingStatus.Reverted) {
+    if (existingBooking.status === BookingStatus.Reverted) {
       eligibleStatuses = [BookingStatus.Drafted, BookingStatus.Created];
     }
 
-    if (exist.status === BookingStatus.Confirmed) {
-      eligibleStatuses = [BookingStatus.Cancelled, BookingStatus.Shipped];
+    if (existingBooking.status === BookingStatus.Confirmed) {
+      eligibleStatuses = [BookingStatus.Shipped];
     }
 
-    if (exist.status === BookingStatus.Shipped) {
+    if (existingBooking.status === BookingStatus.Shipped) {
       eligibleStatuses = [BookingStatus.Delivered];
     }
 
@@ -452,12 +457,46 @@ const updateBookingStatus = async (
       );
     }
 
+    if (
+      status === BookingStatus.Confirmed &&
+      existingBooking.paymentMethod !== PaymentMethod.COD &&
+      existingBooking.paymentStatus !== PaymentStatus.Paid
+    ) {
+      throw new ApiError(
+        httpStatus.CONFLICT,
+        `Can not confirm booking! payment method: ${existingBooking.paymentMethod}, payment status: ${existingBooking.paymentStatus}`
+      );
+    }
+
+    const payload: Partial<Booking> = { status };
+
+    if (
+      eligibleStatuses.includes(status) &&
+      status === BookingStatus.Delivered &&
+      existingBooking.paymentMethod === PaymentMethod.COD
+    ) {
+      const trxnId = makeId("TRXN", 8);
+      const createdPayment = await trxClient.payment.create({
+        data: {
+          userId: existingBooking.userId,
+          bookingId: existingBooking.id,
+          paymentMethod: existingBooking.paymentMethod,
+          totalAmount: existingBooking.totalCost,
+          status: PaymentStatus.Paid,
+          transactionId: trxnId,
+          provider: "DExpress",
+        },
+      });
+
+      payload.paymentStatus = createdPayment.status;
+    }
+
     const updatedBooking = await trxClient.booking.update({
       where: {
         id,
         isDeleted: false,
       },
-      data: { status },
+      data: payload,
     });
 
     await trxClient.bookingLog.create({
