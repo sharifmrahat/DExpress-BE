@@ -6,6 +6,7 @@ import { PackageRouter } from "../modules/packages/packages.router";
 import { FeedbackRouter } from "../modules/feedbacks/feedbacks.router";
 import { ArticleRouter } from "../modules/articles/articles.router";
 import { BookingRouter } from "../modules/bookings/bookings.router";
+import { BookingLogRouter } from "../modules/booking-logs/booking-logs.router";
 const router = express.Router();
 
 const routes = [
@@ -14,6 +15,9 @@ const routes = [
   { path: "/services", module: ServiceRouter },
   { path: "/packages", module: PackageRouter },
   { path: "/bookings", module: BookingRouter },
+  { path: "/booking-logs", module: BookingLogRouter },
+  // { path: "/payment", module: BookingLogRouter },
+  // { path: "/reviews", module: BookingLogRouter },
   { path: "/feedbacks", module: FeedbackRouter },
   { path: "/articles", module: ArticleRouter },
 ];
