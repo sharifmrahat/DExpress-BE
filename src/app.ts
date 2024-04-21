@@ -26,7 +26,7 @@ app.use(globalErrorHandler);
 app.get("/", (req, res) => {
   return res.status(httpStatus.OK).json({
     success: true,
-    message: `Lorry Lagbe app is running`,
+    message: `DExpress app is running`,
   });
 });
 
