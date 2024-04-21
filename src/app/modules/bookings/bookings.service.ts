@@ -411,6 +411,47 @@ const updateBookingStatus = async (
 
     if (!exist) throw new ApiError(httpStatus.NOT_FOUND, "Booking not found!");
 
+    let eligibleStatuses: BookingStatus[] = [];
+
+    if (status === exist.status) {
+      throw new ApiError(httpStatus.CONFLICT, "Can not update same status");
+    }
+
+    if (exist.status === BookingStatus.Delivered) {
+      throw new ApiError(httpStatus.CONFLICT, "Booking already delivered!");
+    }
+
+    if (exist.status === BookingStatus.Drafted) {
+      eligibleStatuses = [BookingStatus.Created, BookingStatus.Cancelled];
+    }
+
+    if (exist.status === BookingStatus.Created) {
+      eligibleStatuses = [BookingStatus.Cancelled, BookingStatus.Confirmed];
+    }
+
+    if (exist.status === BookingStatus.Cancelled) {
+      eligibleStatuses = [BookingStatus.Reverted];
+    }
+
+    if (exist.status === BookingStatus.Reverted) {
+      eligibleStatuses = [BookingStatus.Drafted, BookingStatus.Created];
+    }
+
+    if (exist.status === BookingStatus.Confirmed) {
+      eligibleStatuses = [BookingStatus.Cancelled, BookingStatus.Shipped];
+    }
+
+    if (exist.status === BookingStatus.Shipped) {
+      eligibleStatuses = [BookingStatus.Delivered];
+    }
+
+    if (!eligibleStatuses.includes(status)) {
+      throw new ApiError(
+        httpStatus.CONFLICT,
+        `Status '${status}' is not eligible to update`
+      );
+    }
+
     const updatedBooking = await trxClient.booking.update({
       where: {
         id,

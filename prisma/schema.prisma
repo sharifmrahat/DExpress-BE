@@ -242,6 +242,7 @@ enum BookingStatus {
   Created
   Confirmed
   Cancelled
+  Reverted
   Shipped
   Delivered
 }
