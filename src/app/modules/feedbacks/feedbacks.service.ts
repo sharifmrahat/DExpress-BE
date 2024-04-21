@@ -9,7 +9,7 @@ import { IFeedbackFilterOption } from "./feedbacks.interface";
 import { IValidateUser } from "../auth/auth.interface";
 
 const insertFeedback = async (payload: Feedback): Promise<Feedback> => {
-  const bookingExist = await prismaClient.booking.findFirst({
+  const bookingExist = await prismaClient.booking.findMany({
     where: {
       userId: payload.userId,
       NOT: {
@@ -18,28 +18,28 @@ const insertFeedback = async (payload: Feedback): Promise<Feedback> => {
             BookingStatus.Drafted,
             BookingStatus.Created,
             BookingStatus.Cancelled,
+            BookingStatus.Reverted,
           ],
         },
       },
     },
   });
-  if (!bookingExist) {
+
+  if (!bookingExist.length) {
     throw new ApiError(
       httpStatus.UNAUTHORIZED,
-      "Unauthorized access to create feedback!"
+      "Not eligible to post feedback!"
     );
   }
   const feedbackExist = await prismaClient.feedback.findFirst({
     where: {
-      subject: { equals: payload.subject },
       userId: payload.userId,
     },
   });
+
   if (feedbackExist)
-    throw new ApiError(
-      httpStatus.CONFLICT,
-      "Feedback is already exist with same subject!"
-    );
+    throw new ApiError(httpStatus.CONFLICT, "You've already posted a feedback");
+
   const createdFeedback = await prismaClient.feedback.create({
     data: payload,
   });

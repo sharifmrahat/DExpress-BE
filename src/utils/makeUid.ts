@@ -12,7 +12,5 @@ export const makeId = (prefix: string, length: number = 6) => {
 
   const date = formatInTimeZone(new Date(), timezone, "ddMMyy");
 
-  console.log(date, result);
-
   return `${prefix.toLocaleUpperCase()}-${date}${result}`;
 };
