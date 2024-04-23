@@ -211,7 +211,7 @@ model Article {
   thumbnail String?
   description String
 
-  status ArticleStatus @default(Draft)
+  status ArticleStatus @default(Drafted)
 
   userId String
   user User @relation(fields: [userId], references: [id])
@@ -260,7 +260,7 @@ enum PaymentStatus {
 }
 
 enum ArticleStatus {
- Draft
+ Drafted
  Published
  Archived
 }
