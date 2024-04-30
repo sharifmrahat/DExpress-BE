@@ -79,6 +79,31 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
         updatedById: createdBooking.userId,
       },
     });
+
+    const bookedService = await trxClient.service.findFirst({
+      where: { id: createdBooking.serviceId },
+    });
+    await trxClient.service.update({
+      where: { id: bookedService?.id },
+      data: {
+        totalBooking: bookedService?.totalBooking
+          ? bookedService?.totalBooking + 1
+          : 1,
+      },
+    });
+    if (createdBooking?.packageId) {
+      const bookedPackage = await trxClient.package.findFirst({
+        where: { id: createdBooking.packageId },
+      });
+      await trxClient.package.update({
+        where: { id: bookedPackage?.id },
+        data: {
+          totalBooking: bookedPackage?.totalBooking
+            ? bookedPackage?.totalBooking + 1
+            : 1,
+        },
+      });
+    }
     return createdBooking;
   });
 };

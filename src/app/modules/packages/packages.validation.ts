@@ -11,7 +11,7 @@ const createPackageValidation = z.object({
     serviceId: z.string({
       required_error: "ServiceId is required!",
     }),
-    imageUrl: z.string().optional(),
+    imageUrl: z.string().url().optional(),
     description: z.string().optional(),
   }),
 });
@@ -21,7 +21,7 @@ const updatePackageValidation = z.object({
     title: z.string().optional(),
     price: z.number().optional(),
     serviceId: z.string().optional(),
-    imageUrl: z.string().optional(),
+    imageUrl: z.string().url().optional(),
     description: z.string().optional(),
     isActive: z.boolean().optional(),
     isDeleted: z.boolean().optional(),

@@ -5,7 +5,7 @@ const createServiceValidation = z.object({
     title: z.string({
       required_error: "Title is required!",
     }),
-    imageUrl: z.string().optional(),
+    imageUrl: z.string().url().optional(),
     description: z.string().optional(),
   }),
 });
@@ -13,7 +13,7 @@ const createServiceValidation = z.object({
 const updateServiceValidation = z.object({
   body: z.object({
     title: z.string().optional(),
-    imageUrl: z.string().optional(),
+    imageUrl: z.string().url().optional(),
     description: z.string().optional(),
     isActive: z.boolean().optional(),
     isDeleted: z.boolean().optional(),
