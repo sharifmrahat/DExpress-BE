@@ -13,6 +13,7 @@ const createPackageValidation = z.object({
     }),
     imageUrl: z.string().url().optional(),
     description: z.string().optional(),
+    unit: z.string().optional(),
   }),
 });
 
@@ -23,6 +24,7 @@ const updatePackageValidation = z.object({
     serviceId: z.string().optional(),
     imageUrl: z.string().url().optional(),
     description: z.string().optional(),
+    unit: z.string().optional(),
     isActive: z.boolean().optional(),
     isDeleted: z.boolean().optional(),
   }),

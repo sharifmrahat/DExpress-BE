@@ -62,6 +62,7 @@ model Package {
   price Int
   imageUrl String?
   description String?
+  unit String?
 
   serviceId String
   service Service @relation(fields: [serviceId], references: [id])
