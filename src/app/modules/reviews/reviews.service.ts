@@ -58,9 +58,49 @@ const findAllReviews = async (
   const andCondition = [];
 
   const { search, ...options } = filterOptions;
+
+  let bookingIds: string[] = [];
+
+  if (options.serviceId || options.packageId) {
+    const where = {};
+    if (options.serviceId) {
+      Object.assign(where, { serviceId: options.serviceId });
+    }
+    if (options.packageId) {
+      Object.assign(where, { packageId: options.packageId });
+    }
+
+    const bookings = await prismaClient.booking.findMany({
+      where,
+    });
+    bookingIds = bookings.map((e) => e.id);
+  }
+
   if (Object.keys(options).length) {
     andCondition.push({
       AND: Object.entries(options).map(([field, value]) => {
+        if (field === "minRating") {
+          return {
+            rating: {
+              gte: Number(value),
+            },
+          };
+        }
+
+        if (field === "maxRating") {
+          return {
+            rating: {
+              lte: Number(value),
+            },
+          };
+        }
+
+        if (field === "serviceId" || field === "packageId") {
+          return {
+            bookingId: { in: bookingIds },
+          };
+        }
+
         return {
           [field]: value,
         };
@@ -132,7 +172,56 @@ const findMyReviews = async (
 
   andCondition.push({ userId: validateUser.userId });
 
-  const { search } = filterOptions;
+  const { search, ...options } = filterOptions;
+
+  let bookingIds: string[] = [];
+
+  if (options.serviceId || options.packageId) {
+    const where = {};
+    if (options.serviceId) {
+      Object.assign(where, { serviceId: options.serviceId });
+    }
+    if (options.packageId) {
+      Object.assign(where, { packageId: options.packageId });
+    }
+
+    const bookings = await prismaClient.booking.findMany({
+      where,
+    });
+    bookingIds = bookings.map((e) => e.id);
+  }
+
+  if (Object.keys(options).length) {
+    andCondition.push({
+      AND: Object.entries(options).map(([field, value]) => {
+        if (field === "minRating") {
+          return {
+            rating: {
+              gte: Number(value),
+            },
+          };
+        }
+
+        if (field === "maxRating") {
+          return {
+            rating: {
+              lte: Number(value),
+            },
+          };
+        }
+
+        if (field === "serviceId" || field === "packageId") {
+          return {
+            bookingId: { in: bookingIds },
+          };
+        }
+
+        return {
+          [field]: value,
+        };
+      }),
+    });
+  }
 
   if (search)
     andCondition.push({

@@ -27,6 +27,8 @@ const findAllReviews = catchAsync(async (req, res) => {
     "search",
     "userId",
     "bookingId",
+    "serviceId",
+    "packageId",
     "minRating",
     "maxRating",
   ]);
@@ -55,6 +57,8 @@ const findMyReviews = catchAsync(async (req, res) => {
     "search",
     "userId",
     "bookingId",
+    "serviceId",
+    "packageId",
     "minRating",
     "maxRating",
   ]);
