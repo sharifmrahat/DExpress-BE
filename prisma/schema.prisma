@@ -46,6 +46,7 @@ model Service {
 
   packages Package[]
   bookings Booking[]
+  reviews Review[]
 
   totalBooking Int @default(0)
 
@@ -68,6 +69,7 @@ model Package {
   service Service @relation(fields: [serviceId], references: [id])
 
   bookings Booking[]
+  reviews Review[]
 
   totalBooking Int @default(0)
 
@@ -179,6 +181,12 @@ model Review {
 
   bookingId String @unique
   booking Booking @relation(fields: [bookingId], references: [id])
+
+  serviceId String
+  service Service @relation(fields: [serviceId], references: [id])
+
+  packageId String?
+  package Package? @relation(fields: [packageId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

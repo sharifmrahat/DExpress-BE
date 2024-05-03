@@ -42,7 +42,11 @@ const insertReview = async (payload: Review): Promise<Review> => {
   }
 
   const createdReview = await prismaClient.review.create({
-    data: payload,
+    data: {
+      ...payload,
+      serviceId: bookingExist.serviceId,
+      packageId: bookingExist.packageId,
+    },
   });
 
   return createdReview;
@@ -58,23 +62,6 @@ const findAllReviews = async (
   const andCondition = [];
 
   const { search, ...options } = filterOptions;
-
-  let bookingIds: string[] = [];
-
-  if (options.serviceId || options.packageId) {
-    const where = {};
-    if (options.serviceId) {
-      Object.assign(where, { serviceId: options.serviceId });
-    }
-    if (options.packageId) {
-      Object.assign(where, { packageId: options.packageId });
-    }
-
-    const bookings = await prismaClient.booking.findMany({
-      where,
-    });
-    bookingIds = bookings.map((e) => e.id);
-  }
 
   if (Object.keys(options).length) {
     andCondition.push({
@@ -92,12 +79,6 @@ const findAllReviews = async (
             rating: {
               lte: Number(value),
             },
-          };
-        }
-
-        if (field === "serviceId" || field === "packageId") {
-          return {
-            bookingId: { in: bookingIds },
           };
         }
 
@@ -125,6 +106,8 @@ const findAllReviews = async (
     where: whereCondition,
     include: {
       booking: true,
+      service: true,
+      package: true,
       user: {
         select: {
           id: true,
@@ -170,26 +153,7 @@ const findMyReviews = async (
 
   const andCondition = [];
 
-  andCondition.push({ userId: validateUser.userId });
-
   const { search, ...options } = filterOptions;
-
-  let bookingIds: string[] = [];
-
-  if (options.serviceId || options.packageId) {
-    const where = {};
-    if (options.serviceId) {
-      Object.assign(where, { serviceId: options.serviceId });
-    }
-    if (options.packageId) {
-      Object.assign(where, { packageId: options.packageId });
-    }
-
-    const bookings = await prismaClient.booking.findMany({
-      where,
-    });
-    bookingIds = bookings.map((e) => e.id);
-  }
 
   if (Object.keys(options).length) {
     andCondition.push({
@@ -207,12 +171,6 @@ const findMyReviews = async (
             rating: {
               lte: Number(value),
             },
-          };
-        }
-
-        if (field === "serviceId" || field === "packageId") {
-          return {
-            bookingId: { in: bookingIds },
           };
         }
 
@@ -240,6 +198,8 @@ const findMyReviews = async (
     where: whereCondition,
     include: {
       booking: true,
+      service: true,
+      package: true,
       user: {
         select: {
           id: true,
