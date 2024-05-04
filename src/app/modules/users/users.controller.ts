@@ -39,16 +39,6 @@ const findOneUser = catchAsync(async (req, res) => {
   return responseData({ message: "User fetched successfully", result }, res);
 });
 
-const updateUser = catchAsync(async (req, res) => {
-  const id = req.params.id;
-  const data = req.body;
-  const user = (req as any).user as IValidateUser;
-
-  const result = await UserService.updateUser(id, data, user);
-
-  return responseData({ message: "User updated successfully", result }, res);
-});
-
 const userProfile = catchAsync(async (req, res) => {
   const user = (req as any).user as IValidateUser;
 
@@ -57,6 +47,25 @@ const userProfile = catchAsync(async (req, res) => {
     { message: "User profile fetched successfully", result },
     res
   );
+});
+
+const updateUser = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+
+  const result = await UserService.updateUser(id, data);
+
+  return responseData({ message: "User updated successfully", result }, res);
+});
+
+const updateProfile = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  const user = (req as any).user as IValidateUser;
+
+  const result = await UserService.updateProfile(data, user);
+
+  return responseData({ message: "User updated successfully", result }, res);
 });
 
 const updatePassword = catchAsync(async (req, res) => {
@@ -81,10 +90,11 @@ const deleteUser = catchAsync(async (req, res) => {
 
 export const UserController = {
   insertUser,
-  updateUser,
-  deleteUser,
-  userProfile,
-  findOneUser,
   findUsers,
+  findOneUser,
+  userProfile,
+  updateUser,
+  updateProfile,
   updatePassword,
+  deleteUser,
 };

@@ -21,6 +21,20 @@ const createUserValidation = z.object({
   }),
 });
 
+const updateProfileValidation = z.object({
+  body: z.object({
+    name: z.string().optional(),
+    email: z
+      .string()
+      .email()
+      .transform((val) => val.trim().toLowerCase())
+      .optional(),
+    contactNo: z.string().optional(),
+    addresses: z.array(z.string()).optional(),
+    imageUrl: z.string().url().optional(),
+  }),
+});
+
 const updateUserValidation = z.object({
   body: z.object({
     name: z.string().optional(),
@@ -47,4 +61,5 @@ export const UserValidation = {
   createUserValidation,
   updateUserValidation,
   updatePasswordValidation,
+  updateProfileValidation,
 };

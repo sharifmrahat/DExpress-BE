@@ -22,7 +22,7 @@ const findArticles = catchAsync(async (req, res) => {
     "sortOrder",
   ]);
   const filterOptions = pick(query, ["search", "status", "userId"]);
-  const user = (req as any).user as IValidateUser;
+  const user = (req as any)?.user as IValidateUser;
   const result = await ArticleService.findArticles(
     filterOptions,
     paginationOptions,

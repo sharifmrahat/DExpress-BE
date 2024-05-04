@@ -7,7 +7,6 @@ import { IArticleFilterOption } from "./articles.interface";
 import paginationHelpers, {
   IPaginationOption,
 } from "../../../helpers/pagination-helpers";
-import { makeId } from "../../../utils/makeUid";
 
 const insertArticle = async (payload: Article): Promise<Article> => {
   const articleExist = await prismaClient.article.findFirst({
@@ -152,7 +151,7 @@ const findArticlesByUserId = async (
 
   const andCondition = [];
 
-  andCondition.push({ userId: validateUser.userId });
+  andCondition.push({ userId: validateUser?.userId });
 
   const { search, ...options } = filterOptions;
 

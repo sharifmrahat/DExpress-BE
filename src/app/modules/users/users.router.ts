@@ -21,6 +21,11 @@ router
   .get(
     auth(Role.customer, Role.admin, Role.super_admin),
     UserController.userProfile
+  )
+  .patch(
+    auth(Role.customer, Role.admin, Role.super_admin),
+    validateRequest(UserValidation.updateProfileValidation),
+    UserController.updateProfile
   );
 
 router
@@ -33,9 +38,9 @@ router
 
 router
   .route("/:id")
-  .get(auth(Role.admin, Role.super_admin), UserController.findOneUser)
+  .get(auth(Role.super_admin), UserController.findOneUser)
   .patch(
-    auth(Role.customer, Role.admin, Role.super_admin),
+    auth(Role.super_admin),
     validateRequest(UserValidation.updateUserValidation),
     UserController.updateUser
   )
