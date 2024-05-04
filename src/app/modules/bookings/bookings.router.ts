@@ -18,7 +18,7 @@ router
 
 router
   .route("/create-quotation")
-  .get(
+  .post(
     auth(Role.admin, Role.super_admin),
     validateRequest(BookingValidation.createQuotationZodSchema),
     BookingController.insertBooking
