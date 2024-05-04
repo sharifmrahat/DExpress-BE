@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import catchAsync from "../../../shared/catch-async";
 import pick from "../../../shared/pick";
 import responseData from "../../../shared/response";
@@ -7,9 +8,10 @@ import { BookingService } from "./bookings.service";
 const insertBooking = catchAsync(async (req, res) => {
   const booking = req.body;
   const user = (req as any).user as IValidateUser;
+
   const result = await BookingService.insertBooking({
     ...booking,
-    userId: user.userId,
+    userId: user.role === Role.customer ? user.userId : booking?.customerId,
   });
 
   return responseData({ message: "Booking created successfully", result }, res);

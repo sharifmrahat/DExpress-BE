@@ -27,6 +27,42 @@ const createBookingZodSchema = z.object({
         required_error: "Payment Method is required!",
       })
       .default("COD"),
+    totalCost: z.number().optional().default(0),
+  }),
+});
+
+const createQuotationZodSchema = z.object({
+  body: z.object({
+    customerId: z.string({
+      required_error: "CustomerId is required!",
+    }),
+    bookingType: z
+      .enum(["Package", "Custom"], {
+        required_error: "Booking type is required!",
+      })
+      .default("Package"),
+    serviceId: z.string({
+      required_error: "ServiceId is required!",
+    }),
+    packageId: z.string().optional(),
+    deliveryDate: z
+      .string({
+        required_error: "Delivery Date is required!",
+      })
+      .transform((str) => new Date(str)),
+    shippingAddress: z.string({
+      required_error: "Shipping Address is required!",
+    }),
+    billingAddress: z.string({
+      required_error: "Billing Address is required!",
+    }),
+    remarks: z.string().optional(),
+    paymentMethod: z
+      .enum(["COD", "Stripe", "SSLCommerze"], {
+        required_error: "Payment Method is required!",
+      })
+      .default("COD"),
+    totalCost: z.number().optional().default(0),
   }),
 });
 
@@ -66,6 +102,7 @@ const updateBookingStatusZodSchema = z.object({
 
 export const BookingValidation = {
   createBookingZodSchema,
+  createQuotationZodSchema,
   updateBookingZodSchema,
   updateBookingStatusZodSchema,
 };

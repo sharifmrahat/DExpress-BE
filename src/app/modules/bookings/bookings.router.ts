@@ -17,6 +17,14 @@ router
   );
 
 router
+  .route("/create-quotation")
+  .get(
+    auth(Role.admin, Role.super_admin),
+    validateRequest(BookingValidation.createQuotationZodSchema),
+    BookingController.insertBooking
+  );
+
+router
   .route("/my-bookings")
   .get(auth(Role.customer), BookingController.findMyBookings);
 

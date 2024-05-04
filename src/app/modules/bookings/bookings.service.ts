@@ -26,6 +26,13 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
       throw new ApiError(httpStatus.NOT_FOUND, "Service not exist");
     }
 
+    const selectedCustomer = await trxClient.user.findUnique({
+      where: { id: payload.userId },
+    });
+    if (!selectedCustomer) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Customer not exist");
+    }
+
     const existBooking = await trxClient.booking.findFirst({
       where: {
         userId: payload.userId,
