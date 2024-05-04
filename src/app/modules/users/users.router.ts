@@ -9,7 +9,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .get(auth(Role.admin, Role.super_admin), UserController.findUsers)
+  .get(auth(Role.super_admin), UserController.findUsers)
   .post(
     auth(Role.super_admin),
     validateRequest(UserValidation.createUserValidation),
