@@ -41,7 +41,6 @@ const findOneUser = catchAsync(async (req, res) => {
 
 const userProfile = catchAsync(async (req, res) => {
   const user = (req as any).user as IValidateUser;
-
   const result = await UserService.findOneUser(user.userId);
   return responseData(
     { message: "User profile fetched successfully", result },
@@ -59,7 +58,6 @@ const updateUser = catchAsync(async (req, res) => {
 });
 
 const updateProfile = catchAsync(async (req, res) => {
-  const id = req.params.id;
   const data = req.body;
   const user = (req as any).user as IValidateUser;
 

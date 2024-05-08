@@ -110,7 +110,7 @@ const findUsers = async (
 };
 
 const updateProfile = async (
-  payload: User,
+  payload: Partial<User>,
   validateUser: IValidateUser
 ): Promise<Omit<User, "password"> | null> => {
   const userExist = await prismaClient.user.findUnique({
@@ -124,6 +124,23 @@ const updateProfile = async (
   if (userExist.id !== validateUser.userId) {
     throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized access");
   }
+
+  if (payload.email) {
+    const userExist = await prismaClient.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+    });
+    if (userExist)
+      throw new ApiError(
+        httpStatus.CONFLICT,
+        "User already exists with same email"
+      );
+    else {
+      payload.isVerified = false;
+    }
+  }
+
   const user: Partial<User> = await prismaClient.user.update({
     where: {
       id: validateUser.userId,
@@ -145,6 +162,22 @@ const updateUser = async (
   });
 
   if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
+
+  if (payload.email) {
+    const userExist = await prismaClient.user.findUnique({
+      where: {
+        email: payload.email,
+      },
+    });
+    if (userExist)
+      throw new ApiError(
+        httpStatus.CONFLICT,
+        "User already exists with same email"
+      );
+    else {
+      payload.isVerified = false;
+    }
+  }
 
   const user: Partial<User> = await prismaClient.user.update({
     where: {
