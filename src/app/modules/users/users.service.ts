@@ -247,7 +247,7 @@ const updatePassword = async (
       userExist?.password
     );
     if (!matchPassword) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "Password not matched!");
+      throw new ApiError(httpStatus.BAD_REQUEST, "Current password is wrong!");
     } else {
       payload.newPassword = await bcrypt.hash(
         newPassword!,
