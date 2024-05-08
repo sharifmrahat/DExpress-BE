@@ -33,7 +33,7 @@ const updateProfileValidation = z.object({
       .optional(),
     contactNo: z.string().optional(),
     addresses: z.array(z.string()).optional(),
-    imageUrl: z.string().url().optional(),
+    imageUrl: z.string().optional(),
   }),
 });
 
