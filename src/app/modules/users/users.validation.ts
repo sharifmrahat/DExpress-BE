@@ -2,9 +2,11 @@ import { z } from "zod";
 
 const createUserValidation = z.object({
   body: z.object({
-    name: z.string({
-      required_error: "Name is required!",
-    }),
+    name: z
+      .string({
+        required_error: "Name is required!",
+      })
+      .trim(),
     email: z
       .string({
         required_error: "Email is required!",
@@ -23,7 +25,7 @@ const createUserValidation = z.object({
 
 const updateProfileValidation = z.object({
   body: z.object({
-    name: z.string().optional(),
+    name: z.string().trim().optional(),
     email: z
       .string()
       .email()
@@ -37,7 +39,7 @@ const updateProfileValidation = z.object({
 
 const updateUserValidation = z.object({
   body: z.object({
-    name: z.string().optional(),
+    name: z.string().trim().optional(),
     email: z
       .string()
       .email()
