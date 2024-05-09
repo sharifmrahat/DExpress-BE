@@ -52,8 +52,6 @@ const findServices = async (
     });
   }
 
-  console.log(search);
-
   if (search)
     andCondition.push({
       OR: ["title", "description"].map((field) => ({
