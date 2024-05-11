@@ -36,8 +36,9 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
     const existBooking = await trxClient.booking.findFirst({
       where: {
         userId: payload.userId,
+        bookingType: payload.bookingType,
         serviceId: selectedService.id,
-        status: BookingStatus.Created,
+        status: { in: [BookingStatus.Drafted, BookingStatus.Created] },
         isDeleted: false,
       },
     });
@@ -45,7 +46,7 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
     if (existBooking)
       throw new ApiError(
         httpStatus.CONFLICT,
-        `This Service already booked by you, BookingId: ${existBooking.bkId}, status: ${existBooking.status}`
+        `This Service already ${existBooking.status}, Booking ID: ${existBooking.bkId}`
       );
 
     if (payload.packageId) {
