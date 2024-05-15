@@ -21,7 +21,7 @@ const findUsers = catchAsync(async (req, res) => {
     "sortBy",
     "sortOrder",
   ]);
-  const filterOptions = pick(query, ["search", "role"]);
+  const filterOptions = pick(query, ["search", "role", "id"]);
   const result = await UserService.findUsers(filterOptions, paginationOptions);
   return responseData(
     {
