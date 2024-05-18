@@ -74,7 +74,7 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
     if (isBefore(payload.deliveryDate, addDays(new Date(), 1))) {
       throw new ApiError(
         httpStatus.BAD_REQUEST,
-        "Invalid delivery date. Delivery date must be onwards from today!"
+        "Invalid delivery date. Delivery date must be onwards from tomorrow!"
       );
     }
 

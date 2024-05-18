@@ -28,6 +28,7 @@ const createBookingZodSchema = z.object({
       })
       .default("COD"),
     totalCost: z.number().optional().default(0),
+    status: z.enum(["Drafted", "Created"]).default("Created").optional(),
   }),
 });
 
@@ -63,6 +64,7 @@ const createQuotationZodSchema = z.object({
       })
       .default("COD"),
     totalCost: z.number().optional().default(0),
+    status: z.enum(["Drafted", "Created"]).default("Created").optional(),
   }),
 });
 
