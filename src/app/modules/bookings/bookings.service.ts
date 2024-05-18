@@ -16,6 +16,7 @@ import prismaClient from "../../../shared/prisma-client";
 import { IValidateUser } from "../auth/auth.interface";
 import { makeId } from "../../../utils/makeUid";
 import { IBookingFilterOption } from "./bookings.interface";
+import { isBefore, addDays } from "date-fns";
 
 const insertBooking = async (payload: Booking): Promise<Booking> => {
   return await prismaClient.$transaction(async (trxClient) => {
@@ -68,6 +69,13 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
       payload.paymentMethod !== PaymentMethod.COD
     ) {
       payload.status = BookingStatus.Drafted;
+    }
+
+    if (isBefore(payload.deliveryDate, addDays(new Date(), 1))) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "Invalid delivery date. Delivery date must be onwards from today!"
+      );
     }
 
     const bkId = makeId("DXBK");
