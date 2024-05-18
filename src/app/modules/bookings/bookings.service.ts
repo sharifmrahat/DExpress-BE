@@ -415,7 +415,7 @@ const updateBooking = async (
       throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized access");
     }
 
-    if (payload.packageId) {
+    if (payload?.packageId) {
       const selectedPackage = await trxClient.package.findUnique({
         where: { id: payload.packageId, serviceId: exist.serviceId },
       });
@@ -426,6 +426,10 @@ const updateBooking = async (
         );
       }
       payload.totalCost = selectedPackage.price;
+    }
+
+    if (payload?.totalCost && user.role === Role.customer) {
+      throw new ApiError(httpStatus.BAD_REQUEST, `Can not update total cost`);
     }
 
     if (

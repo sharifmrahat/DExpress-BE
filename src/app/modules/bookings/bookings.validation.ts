@@ -80,6 +80,7 @@ const updateBookingZodSchema = z.object({
     billingAddress: z.string().optional(),
     remarks: z.string().optional(),
     paymentMethod: z.enum(["COD", "Stripe", "SSLCommerze"]).optional(),
+    totalCost: z.number().optional().default(0),
   }),
 });
 
