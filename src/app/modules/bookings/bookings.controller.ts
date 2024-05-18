@@ -11,7 +11,7 @@ const insertBooking = catchAsync(async (req, res) => {
 
   const result = await BookingService.insertBooking({
     ...booking,
-    userId: user.role === Role.customer ? user.userId : booking?.customerId,
+    userId: user.role === Role.customer ? user?.userId : booking?.userId,
   });
 
   return responseData({ message: "Booking created successfully", result }, res);

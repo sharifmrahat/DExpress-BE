@@ -34,8 +34,8 @@ const createBookingZodSchema = z.object({
 
 const createQuotationZodSchema = z.object({
   body: z.object({
-    customerId: z.string({
-      required_error: "CustomerId is required!",
+    userId: z.string({
+      required_error: "UserId is required!",
     }),
     bookingType: z
       .enum(["Package", "Custom"], {
