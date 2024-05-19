@@ -5,6 +5,9 @@ import config from "../../../config";
 import httpStatus from "http-status";
 import { JwtHelpers } from "../../../helpers/jwt-helpers";
 import ApiError from "../../../errors/api-error";
+import { makeId } from "../../../utils/makeUid";
+import { sendEmail } from "../../../utils/sendEmail";
+import { generateOtp } from "../../../utils/generateOtp";
 
 const login = async (payload: { email: string; password: string }) => {
   const userExist = await prismaClient.user.findUnique({
@@ -59,6 +62,28 @@ const signup = async (payload: User) => {
       id: createdUser.id,
     },
   });
+
+  if (user) {
+    const otp = generateOtp(6);
+
+    await prismaClient.user.update({
+      where: {
+        id: user?.id,
+      },
+      data: {
+        currentOtp: otp,
+      },
+    });
+
+    const emailData = {
+      to: payload.email,
+      subject: "Welcome to DExpress",
+      text: "Please use this secret code to verify your email.",
+      html: `<p>Code: <b>${otp}</b></p>`,
+    };
+
+    await sendEmail(emailData);
+  }
 
   const accessToken = JwtHelpers.generateToken({
     userId: user?.id,
