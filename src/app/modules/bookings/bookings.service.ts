@@ -17,6 +17,7 @@ import { IValidateUser } from "../auth/auth.interface";
 import { makeId } from "../../../utils/makeUid";
 import { IBookingFilterOption } from "./bookings.interface";
 import { isBefore, addDays } from "date-fns";
+import { sendEmail } from "../../../utils/sendEmail";
 
 const insertBooking = async (payload: Booking): Promise<Booking> => {
   return await prismaClient.$transaction(async (trxClient) => {
@@ -124,6 +125,18 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
         },
       });
     }
+
+    const emailData = {
+      to: selectedCustomer.email as string,
+      subject: `DExpress - Booking ${createdBooking.status}`,
+      text: `Your booking is ${createdBooking.status}`,
+      html: `
+      <p>Booking No: <b>${createdBooking.bkId}</b></p>
+     <p><a href="https://dexpress-dev.vercel.app/my-bookings/${createdBooking.id}" target="_blank">See Details</a></p>
+      `,
+    };
+
+    await sendEmail(emailData);
     return createdBooking;
   });
 };
@@ -564,6 +577,24 @@ const updateBookingStatus = async (
         updatedById: user.userId,
       },
     });
+
+    const customer = await trxClient.user.findUnique({
+      where: { id: updatedBooking?.userId },
+    });
+
+    const admin = await trxClient.user.findUnique({
+      where: { id: user.userId },
+    });
+
+    const emailData = {
+      to: customer?.email as string,
+      subject: `DExpress - Booking ${updatedBooking.status}`,
+      text: `Your booking is ${updatedBooking.status}`,
+      html: `<p>Booking No: <b>${updatedBooking.bkId}</b></p>
+      <p>${updatedBooking.status} by: <b>${admin?.name}, Email: ${admin?.email}</b></p>`,
+    };
+
+    await sendEmail(emailData);
 
     return updatedBooking;
   });
