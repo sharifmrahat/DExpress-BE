@@ -2,6 +2,8 @@ import express from "express";
 import validateRequest from "../../middlewares/validate-request";
 import { AuthController } from "./auth.controller";
 import { AuthValidation } from "./auth.validation";
+import auth from "../../middlewares/auth";
+import { Role } from "@prisma/client";
 
 const router = express.Router();
 
@@ -32,6 +34,11 @@ router
     AuthController.verifyEmail
   );
 
-router.route("/send-otp").get(AuthController.sendOTP);
+router
+  .route("/send-otp")
+  .get(
+    auth(Role.customer, Role.admin, Role.super_admin),
+    AuthController.sendOTP
+  );
 
 export const AuthRouter = router;

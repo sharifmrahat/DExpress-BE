@@ -205,8 +205,8 @@ const sendOTP = async (user: IValidateUser) => {
   };
 
   await sendEmail(emailData);
-
-  return updatedUser;
+  const { currentOtp, password, ...rest } = updatedUser;
+  return rest;
 };
 
 export const AuthService = {
