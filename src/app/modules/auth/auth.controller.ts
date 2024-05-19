@@ -1,5 +1,6 @@
 import catchAsync from "../../../shared/catch-async";
 import responseData from "../../../shared/response";
+import { IValidateUser } from "./auth.interface";
 import { AuthService } from "./auth.service";
 
 const signup = catchAsync(async (req, res) => {
@@ -39,8 +40,35 @@ const socialAuth = catchAsync(async (req, res) => {
   );
 });
 
+const verifyEmail = catchAsync(async (req, res) => {
+  const { otp } = req?.body;
+  const user = (req as any).user as IValidateUser;
+  const result = await AuthService.verifyEmail(otp, user);
+  return responseData(
+    {
+      message: `User successfully verified!`,
+      result,
+    },
+    res
+  );
+});
+
+const sendOTP = catchAsync(async (req, res) => {
+  const user = (req as any).user as IValidateUser;
+  const result = await AuthService.sendOTP(user);
+  return responseData(
+    {
+      message: `OTP has been sent to ${user?.email}`,
+      result,
+    },
+    res
+  );
+});
+
 export const AuthController = {
   signup,
   login,
   socialAuth,
+  verifyEmail,
+  sendOTP,
 };

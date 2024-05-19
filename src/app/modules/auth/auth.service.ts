@@ -8,6 +8,7 @@ import ApiError from "../../../errors/api-error";
 import { makeId } from "../../../utils/makeUid";
 import { sendEmail } from "../../../utils/sendEmail";
 import { generateOtp } from "../../../utils/generateOtp";
+import { IValidateUser } from "./auth.interface";
 
 const login = async (payload: { email: string; password: string }) => {
   const userExist = await prismaClient.user.findUnique({
@@ -79,7 +80,7 @@ const signup = async (payload: User) => {
       to: payload.email,
       subject: "Welcome to DExpress",
       text: "Please use this secret code to verify your email.",
-      html: `<p>Code: <b>${otp}</b></p>`,
+      html: `<p>OTP: <b>${otp}</b></p>`,
     };
 
     await sendEmail(emailData);
@@ -139,8 +140,79 @@ const socialAuth = async (payload: User) => {
   }
 };
 
+const verifyEmail = async (otp: string, user: IValidateUser) => {
+  const userExist = await prismaClient.user.findUnique({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  if (!userExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User does not exist");
+  }
+
+  if (!userExist.currentOtp) {
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      "OTP not found! first send OTP & verify again!"
+    );
+  }
+
+  if (otp !== userExist.currentOtp) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Wrong OTP, try send again!");
+  }
+
+  const verifiedUser = await prismaClient.user.update({
+    where: {
+      id: userExist.id,
+    },
+    data: {
+      isVerified: true,
+      currentOtp: null,
+    },
+  });
+
+  return verifiedUser;
+};
+
+const sendOTP = async (user: IValidateUser) => {
+  const userExist = await prismaClient.user.findUnique({
+    where: {
+      email: user?.email,
+    },
+  });
+
+  if (!userExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User does not exist");
+  }
+
+  const otp = generateOtp(6);
+
+  const updatedUser = await prismaClient.user.update({
+    where: {
+      id: userExist.id,
+    },
+    data: {
+      currentOtp: otp,
+    },
+  });
+
+  const emailData = {
+    to: userExist.email,
+    subject: "DExpress Verification",
+    text: "Please use this secret code to verify your email.",
+    html: `<p>OTP: <b>${otp}</b></p>`,
+  };
+
+  await sendEmail(emailData);
+
+  return updatedUser;
+};
+
 export const AuthService = {
   signup,
   login,
   socialAuth,
+  verifyEmail,
+  sendOTP,
 };

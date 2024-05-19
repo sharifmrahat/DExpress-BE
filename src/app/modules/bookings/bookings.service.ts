@@ -34,6 +34,10 @@ const insertBooking = async (payload: Booking): Promise<Booking> => {
       throw new ApiError(httpStatus.NOT_FOUND, "Customer not exist");
     }
 
+    if (!selectedCustomer.isVerified) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, "Customer is not verified!");
+    }
+
     const existBooking = await trxClient.booking.findFirst({
       where: {
         userId: payload.userId,

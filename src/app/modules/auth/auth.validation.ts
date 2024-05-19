@@ -45,8 +45,17 @@ const socialAuthZodSchema = z.object({
   }),
 });
 
+const verifyEmailZodSchema = z.object({
+  body: z.object({
+    otp: z.string({
+      required_error: "OTP is required!",
+    }),
+  }),
+});
+
 export const AuthValidation = {
   signupAuthZodSchema,
   loginAuthZodSchema,
   socialAuthZodSchema,
+  verifyEmailZodSchema,
 };

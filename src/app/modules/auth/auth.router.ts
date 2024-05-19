@@ -25,4 +25,13 @@ router
     AuthController.socialAuth
   );
 
+router
+  .route("/verify-email")
+  .post(
+    validateRequest(AuthValidation.verifyEmailZodSchema),
+    AuthController.verifyEmail
+  );
+
+router.route("/send-otp").get(AuthController.sendOTP);
+
 export const AuthRouter = router;
