@@ -37,7 +37,7 @@ router
 
 router
   .route("/send-otp")
-  .get(
+  .post(
     auth(Role.customer, Role.admin, Role.super_admin),
     AuthController.sendOTP
   );
