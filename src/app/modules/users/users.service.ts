@@ -126,20 +126,25 @@ const updateProfile = async (
     throw new ApiError(httpStatus.UNAUTHORIZED, "Unauthorized access");
   }
 
-  if (payload.email) {
-    const userExist = await prismaClient.user.findUnique({
+  if (payload?.email !== userExist.email && userExist.isVerified) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Can't change a verified email!"
+    );
+  }
+
+  if (payload?.email !== userExist.email) {
+    const emailExist = await prismaClient.user.findUnique({
       where: {
         email: payload.email,
+        NOT: { id: userExist.id },
       },
     });
-    if (userExist)
+    if (emailExist)
       throw new ApiError(
         httpStatus.CONFLICT,
         "User already exists with same email"
       );
-    else {
-      payload.isVerified = false;
-    }
   }
 
   const user: Partial<User> = await prismaClient.user.update({
@@ -165,20 +170,25 @@ const updateUser = async (
 
   if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
 
-  if (payload.email) {
-    const userExist = await prismaClient.user.findUnique({
+  if (payload?.email !== userExist.email && userExist.isVerified) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Can't change a verified email!"
+    );
+  }
+
+  if (payload?.email !== userExist.email) {
+    const emailExist = await prismaClient.user.findUnique({
       where: {
         email: payload.email,
+        NOT: { id: id },
       },
     });
-    if (userExist)
+    if (emailExist)
       throw new ApiError(
         httpStatus.CONFLICT,
         "User already exists with same email"
       );
-    else {
-      payload.isVerified = false;
-    }
   }
 
   const user: Partial<User> = await prismaClient.user.update({
