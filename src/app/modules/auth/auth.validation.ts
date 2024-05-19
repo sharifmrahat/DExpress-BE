@@ -47,7 +47,7 @@ const socialAuthZodSchema = z.object({
 
 const verifyEmailZodSchema = z.object({
   body: z.object({
-    otp: z.string({
+    currentOtp: z.string({
       required_error: "OTP is required!",
     }),
   }),

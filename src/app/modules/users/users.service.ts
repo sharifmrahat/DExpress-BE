@@ -48,6 +48,7 @@ const findOneUser = async (
   if (!userExist) throw new ApiError(httpStatus.NOT_FOUND, "User not exists");
 
   delete userExist.password;
+  delete userExist.currentOtp;
   return userExist as Omit<User, "password">;
 };
 
@@ -148,6 +149,7 @@ const updateProfile = async (
     data: payload,
   });
   delete user.password;
+  delete user.currentOtp;
   return user as Omit<User, "password">;
 };
 
@@ -186,6 +188,7 @@ const updateUser = async (
     data: payload,
   });
   delete user.password;
+  delete user.currentOtp;
   return user as Omit<User, "password">;
 };
 
@@ -260,6 +263,7 @@ const updatePassword = async (
         data: { password: payload.newPassword },
       });
       delete user.password;
+      delete user.currentOtp;
       return user as Omit<User, "password">;
     }
   }

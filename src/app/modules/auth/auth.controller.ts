@@ -41,9 +41,9 @@ const socialAuth = catchAsync(async (req, res) => {
 });
 
 const verifyEmail = catchAsync(async (req, res) => {
-  const { otp } = req?.body;
+  const { currentOtp } = req?.body;
   const user = (req as any).user as IValidateUser;
-  const result = await AuthService.verifyEmail(otp, user);
+  const result = await AuthService.verifyEmail(currentOtp, user);
   return responseData(
     {
       message: `User successfully verified!`,

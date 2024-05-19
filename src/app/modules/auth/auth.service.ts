@@ -140,7 +140,7 @@ const socialAuth = async (payload: User) => {
   }
 };
 
-const verifyEmail = async (otp: string, user: IValidateUser) => {
+const verifyEmail = async (currentOtp: string, user: IValidateUser) => {
   const userExist = await prismaClient.user.findUnique({
     where: {
       email: user?.email,
@@ -158,7 +158,7 @@ const verifyEmail = async (otp: string, user: IValidateUser) => {
     );
   }
 
-  if (otp !== userExist.currentOtp) {
+  if (currentOtp !== userExist.currentOtp) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Wrong OTP, try send again!");
   }
 
@@ -172,7 +172,9 @@ const verifyEmail = async (otp: string, user: IValidateUser) => {
     },
   });
 
-  return verifiedUser;
+  const { password, currentOtp: otp, ...rest } = verifiedUser;
+
+  return rest;
 };
 
 const sendOTP = async (user: IValidateUser) => {

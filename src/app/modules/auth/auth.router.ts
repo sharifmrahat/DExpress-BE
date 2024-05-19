@@ -30,6 +30,7 @@ router
 router
   .route("/verify-email")
   .post(
+    auth(Role.customer, Role.admin, Role.super_admin),
     validateRequest(AuthValidation.verifyEmailZodSchema),
     AuthController.verifyEmail
   );
